@@ -25,12 +25,12 @@ function clicked(e){
     if( c.contains(`selector`) ){ display( t.getAttribute(`data-select`) ); }
     if( c.contains(`tab`) ){ selectTab( t.getAttribute(`data-tab`) ); }
     if( c.contains(`miniTab`) ){ selectMiniTab( t.getAttribute(`data-minitab`), t.getAttribute(`data-span`) ); }
-    if( c.contains(`upgrade`) ){ buyUpgrade( t.getAttribute(`data-upspan`), t.getAttribute(`data-uptype`), t.getAttribute(`data-uptier`) ); }
     if( c.contains(`autoBuy`) ){ pauseAuto( t.getAttribute(`data-auto`) ); }
     if( c.contains(`ring`) ){ pauseAuto( v.selected, t.getAttribute(`data-ring` ) ); }
     if( c.contains(`tooltip`) ){
         t = t.parentElement;
         c = t.classList;
+        if( c.contains(`upgrade`) ){ buyUpgrade( t.getAttribute(`data-upspan`), t.getAttribute(`data-uptype`), t.getAttribute(`data-uptier`) ); }
         if( c.contains(`unassigned`) ){ selectJerk( t.getAttribute(`data-jerk` ) ); }
         else if( c.contains(`slot`) && v.jerkSelected == null ){ unassignJerk( t.getAttribute(`data-slot` ) ); }
         else{ clearJerkSelect(); }
