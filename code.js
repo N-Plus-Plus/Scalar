@@ -18,7 +18,7 @@ function onLoad(){
 function clicked(e){
     let t = e.target;
     let c = t.classList;
-    if( c.contains(`button`) ){ buy( v.selected, t.getAttribute(`data-buy`) ); v.clicked = t.getAttribute(`data-buy`); }
+    if( c.contains(`button`) ){ buy( v.selected, t.getAttribute(`data-buy`), false ); v.clicked = t.getAttribute(`data-buy`); }
     else{ resetHold(); }
     if( c.contains(`complete`) ){ complete( v.selected, false ); }
     if( c.contains(`clickMe`) ){ clickReward( t.getAttribute(`data-click`), t ); }
@@ -115,7 +115,7 @@ function progress(){
         v.mouseTicks++;
         if( v.mouseTicks < 0 ){}
         else if( v.mouseTicks % global.buyEvery !== 0 ){}
-        else{ buy( v.selected, v.clicked ); }
+        else{ buy( v.selected, v.clicked, false ); }
     }
     offsetRings();
     displayProgress();
@@ -131,13 +131,14 @@ function displayComplete(){
 }
 
 function buy( index, g, auto ){ // add bulk
-    if( !afford( index, g ) ){ return false; }
-    v.runs[index].curr.spent += cost( index, g );
-    v.runs[index].gen[g]++;
-    updateCPS( index );
-    if( index !== v.selected ){ saveState(); return; }
-    display( index );
-    saveState();
+    if( afford( index, g ) ){
+        v.runs[index].curr.spent += cost( index, g );
+        v.runs[index].gen[g]++;
+        updateCPS( index );
+        if( auto && index !== v.selected ){}
+        else{ display( v.selected ); }
+        saveState();
+    }
 }
 
 function afford( index, g ){
@@ -339,7 +340,8 @@ function selectMiniTab( n, d ){
 
 function buildTabContents( n, x ){
     if( n == v.tab ){ x = v.miniTab; }
-    if( x == undefined ){ x = 0; }
+    if( n ==  null ){ n = `points`; }
+    if( x == undefined || x == null ){ x = 0; }
     let t = document.querySelector(`[data-upgrades]`);
     t.innerHTML = ``;
     if( n == `points` ){
@@ -465,8 +467,8 @@ function displayRuns(){
         t.appendChild( elem( `selector span${v.runs[r].span}`, span[v.runs[r].span].label, [[`select`,r]] ) );
     }
     let s = document.querySelectorAll(`[data-select]`);
-    for( let i = 0; i < s.length; i++ ){ s[i].classList.add(`deselected`); }
-    document.querySelector(`[data-select="${v.selected}"]`).classList.remove(`deselected`);
+    for( let i = 0; i < s.length; i++ ){ s[i].classList.remove(`selected`); }
+    document.querySelector(`[data-select="${v.selected}"]`).classList.add(`selected`);
 }
 
 function buildContents( index ){
