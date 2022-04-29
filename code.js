@@ -669,10 +669,11 @@ function updateAutoValues(){
     for( r in v.runs ){
         for( a in v.runs[r].auto ){
             let b = parseInt( a.replace(`t`,`` ) );
+            let c = `t` + b;
             if( v.upgrades[v.runs[r].span].autoBuy[b] > 0 ){
                 let t = autoBuyTime( v.runs[r].span, b );
-                if( v.runs[r].auto[a] == null ){ v.runs[r].auto[a] = t; }
-                else if( v.runs[r].auto[a] > autoBuyTime( v.runs[r].span, b ) ){ v.runs[r].auto[a] = t; };
+                if( v.runs[r].auto[c] == null ){ v.runs[r].auto[c] = t; }
+                else if( v.runs[r].auto[c] > autoBuyTime( v.runs[r].span, b ) ){ v.runs[r].auto[c] = t; };
             }
         }
     }
