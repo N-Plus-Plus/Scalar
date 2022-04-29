@@ -375,7 +375,9 @@ function buildTabContents( n, x ){
             }
         }
         t.appendChild( elem( `upgradeHeading spanLabel`, `Cosmic Forces<div class="smaller">${numDisplay( v.roster.length)} / ${numDisplay( getRosterSize() )}</div>` ) );
+        t.appendChild( elem( `smallSpanLabel`, `Force Assignments` ) );
         t.appendChild( buildAssignBox() );
+        t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
         t.appendChild( buildRosterBox() );
         if( v.roster.length >= getRosterSize() ){ document.querySelector(`[data-uptype="recruitJerk"]`).parentElement.classList.add(`halfVis`); }
         v.tab = `points`;
@@ -999,6 +1001,7 @@ const helpful = [
     , `Rewards are based on how much resource you hold`
     , `Bulk Bonus upgrades reward owning a lot of a particular Tier`
     , `You gain one <div class="inlineIcon points"></div> for every completion`
+    , `Assign a Cosmic Force to gain its benefit`
 
 
     , `These messages may be better scrolling in the other direction`
