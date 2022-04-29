@@ -351,13 +351,16 @@ function buildTabContents( n, x ){
             let subj = upgrades.filter( (e) => e.id == ch )[0];
             if( subj !== undefined ){
                 if( subj.scope == `global` ){ // global level
-                    let r = elem( `upgradeRow` );
-                    r.appendChild( elem( `upgrade`, `Buy`, [[`uptype`,ch],[`scope`,`global`]] ) );
-                    if( upgradeAfford( null, subj.id, null ) ){ r.lastChild.classList.add(`affordable`); }
-                    r.appendChild( elem( `label bigCell`, subj.nice ) );
-                    r.appendChild( elem( `stat halfCell`, v.upgrades[ch] ) );
-                    r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
-                    t.appendChild(r);
+                    if( subj.id == `rosterSize` && v.roster.length == 0 ){}
+                    else{
+                        let r = elem( `upgradeRow` );
+                        r.appendChild( elem( `upgrade`, `Buy`, [[`uptype`,ch],[`scope`,`global`]] ) );
+                        if( upgradeAfford( null, subj.id, null ) ){ r.lastChild.classList.add(`affordable`); }
+                        r.appendChild( elem( `label bigCell`, subj.nice ) );
+                        r.appendChild( elem( `stat halfCell`, v.upgrades[ch] ) );
+                        r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
+                        t.appendChild(r);
+                    }
                 }
             }
         }
@@ -777,7 +780,7 @@ const upgrades = [
     {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       math: `add`,        nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
     , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       math: `multiply`,   nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 5%` } // consider making Span rather than Global
     , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     math: `multiply`,   nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
-    , { id: `rosterSize`,   scope: `global`,    cost: 4,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Roster Size`,        tooltip: `Increase your Costmic Forces roster limit by 1` } //
+    , { id: `rosterSize`,   scope: `global`,    cost: 4,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Roster Size`,        tooltip: `Increase your Cosmic Forces roster limit by 1` } //
     , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Max Force Traits`,   tooltip: `Increase the number of Traits a Force can have by 1` } //
     , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     math: `add`,        nice: `Recruit Force`,      tooltip: `Add one Cosmic Force to your roster` } 
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     math: `multiply`,   nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
