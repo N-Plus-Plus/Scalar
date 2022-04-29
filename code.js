@@ -321,6 +321,7 @@ function assignJerk( j, s ){
 function unassignJerk( s ){
     for( jerk in v.roster ){ if( v.roster[jerk].assignment == s ){ v.roster[jerk].assignment = null; } }
     selectTab( `points` );
+    display( v.selected );
 }
 
 function getTraits( s ){
