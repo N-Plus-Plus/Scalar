@@ -12,7 +12,8 @@ function onLoad(){
     else if( v.tab == `points` ){ selectTab( `points` ); };
     setInterval(() => { doLoop( now() ); }, global.tickSpeed );
     resetHold();
-    //selectTab( span[v.tab].curr.toLowerCase(), v.miniTab );
+    displayWings();
+    addScroll();
 }
 
 function clicked(e){
@@ -52,6 +53,7 @@ function doLoop( tick ){
     progress();
     showStats();
     updateButtons();
+    scrollScroll();
     if( Math.random() < v.spawnChance * Math.pow( 1.1, v.upgrades.clickSpawn ) ){ spawnClickMe(); }
     if( tick % 50 == 0 ){ saveState(); }
     v.ms.last = tick;
@@ -215,7 +217,15 @@ function complete( index, auto ){
     else if( index == v.selected ){ display( 0 ); }
     else if( v.selected >= index ){ v.selected = parseInt( v.selected ) - 1; }
     displayRuns();
+    displayWings();
     saveState();
+}
+
+function displayWings(){
+    if( v.curr.gained > 0 ){
+        document.querySelector(`#runs`).classList.remove(`noDisplay`);
+        document.querySelector(`#upgrades`).classList.remove(`noDisplay`);
+    }
 }
 
 function resetHold(){
@@ -568,11 +578,28 @@ function offsetRings(){
 }
 
 function updateButtons(){
-    let b = document.querySelectorAll(`[data-buy]`);
-    for( let i = 0; i < b.length; i++ ){
-        if( afford( v.selected, i ) ){ b[i].classList.add( `available`); }
-        else{ b[i].classList.remove( `available`); }
+    for( let i = 0; i < stat.length; i++ ){
+        if( afford( v.selected, i ) ){ document.querySelector(`[data-buy="${i}"]`).classList.add( `available`); }
+        else{ document.querySelector(`[data-buy="${i}"]`).classList.remove( `available`); }
     }
+}
+
+function scrollScroll(){
+    let s = document.querySelectorAll(`.scroll`);
+    for( let i = 0; i < s.length; i++ ){
+        let newT = parseFloat( s[i].getAttribute(`data-transform`) ) + global.scrollSpeed;
+        s[i].setAttribute( `data-transform`, newT );
+        s[i].style = `transform: translate( ${newT}px, 0px )`;
+        if( newT >= window.innerWidth * 2 ){
+            s[i].parentElement.removeChild(s[i]);
+            addScroll();
+        }
+    }
+}
+
+function addScroll(){
+    let v = shuffle(helpful)[0];
+    document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,0]] ) );
 }
 
 function spawnClickMe(){
@@ -774,6 +801,7 @@ const global = {
     , graceTicks: -10
     , buyEvery: 1
     , minRoster: 1
+    , scrollSpeed: 3
 }
 
 const upgrades = [
@@ -962,9 +990,19 @@ function numDisplay( x ){
 
 const helpful = [
     `Click and hold a Tier to rapid-buy`
-    , `Click the Auto Buy timer to pause / unpause`
-    , `Click the Auto Buy column icon to pause / unpause all`
+    , `Click the Auto Buy timer circle to pause / unpause one Tier`
+    , `Click the Auto Buy icon at the top of the column to pause / unpause all`
     , `Buy Generators fast by pressing the number on your keyboard`
+    , `Cosmic Forces are a big investment for a potentially massive impact`
+    , `You will generate resource while offline, but automation only applies to an open window`
+    , `Rewards are based on how much resource you hold`
+    , `Bulk Bonus upgrades reward owning a lot of a particular Tier`
+    , `You gain one <div class="inlineIcon points"></div> for every completion`
+
+
+    , `These messages may be better scrolling in the other direction`
+    , `59 6F 75 20 77 65 6E 74 20 74 6F 20 61 20 6C 6F 74 20 6F 66 20 74 72 6F 75 62 6C 65 20 74 6F 20 72 65 61 64 20 74 68 69 73 2E 2E 2E`
+    , `Humorous messages will appear here... focussing on features at the sec`
 ]
 
 /*
