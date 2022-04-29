@@ -590,10 +590,10 @@ function updateButtons(){
 function scrollScroll(){
     let s = document.querySelectorAll(`.scroll`);
     for( let i = 0; i < s.length; i++ ){
-        let newT = parseFloat( s[i].getAttribute(`data-transform`) ) + global.scrollSpeed;
+        let newT = parseFloat( s[i].getAttribute(`data-transform`) ) - global.scrollSpeed;
         s[i].setAttribute( `data-transform`, newT );
         s[i].style = `transform: translate( ${newT}px, 0px )`;
-        if( newT >= window.innerWidth * 2 ){
+        if( newT <= 0 ){
             s[i].parentElement.removeChild(s[i]);
             addScroll();
         }
@@ -602,7 +602,7 @@ function scrollScroll(){
 
 function addScroll(){
     let v = shuffle(helpful)[0];
-    document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,0]] ) );
+    document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,window.innerWidth * 2]] ) );
 }
 
 function spawnClickMe(){
@@ -996,7 +996,7 @@ const helpful = [
     `Click and hold a Tier to rapid-buy`
     , `Click the Auto Buy timer circle to pause / unpause one Tier`
     , `Click the Auto Buy icon at the top of the column to pause / unpause all`
-    , `Buy Generators fast by pressing the number on your keyboard`
+    , `Buy Generators fast by pressing and holding the Tier number on your keyboard`
     , `Cosmic Forces are a big investment for a potentially massive impact`
     , `You will generate resource while offline, but automation only applies to an open window`
     , `Rewards are based on how much resource you hold`
