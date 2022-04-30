@@ -653,7 +653,8 @@ function buyUpgrade( d, type, tier ){
         display( v.selected );
         displayRewards();
         if( d == null ){ d = `points`; }
-        buildTabContents( d );
+        selectTab( v.tab );
+        // buildTabContents( d );
     }
 }
 
