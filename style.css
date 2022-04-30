@@ -57,9 +57,11 @@ span{ width: 100%; height: 100%; }
 .button.available{ cursor: pointer; background-color: var(--span); }
 .statRow{ height: 2.5rem; }
 .questBox{ display: flex; align-items: center; justify-content: center; width: 100%; margin: 0 0 1rem 0; }
-.questBar{ height: 3.5rem; width: calc( 100% + 2rem ); background-color: #0009; padding: 0.5rem; position: relative; margin: -1rem -1rem 0 -1rem; }
-.barFill{ background-color: var(--span); height: 100%; width: 0%; }
-.questText{ position: absolute; width: 100%; padding: 1.125rem 1rem; top: 0; }
+.questBar{ height: 3.5rem; width: calc( 100% + 2rem ); background-color: #0009; padding: 0.5rem; position: relative; margin: -1rem -1rem 0 -1rem; z-index: 0; }
+.completing{ height: 3.5rem; max-width: calc( 100% - 2px ); width: 0%; background-color: var(--lgrey); position: absolute; top:0; left: 0; z-index: 1; }
+.barFillBox{ height: 3.5rem; width: calc( 100% - 2px ); z-index: 5; position: absolute; padding: 0.5rem; top: 0; left: 0; }
+.barFill{ background-color: var(--span); height: 2.5rem; border: solid #0000 1rem; width: 0%; }
+.questText{ position: absolute; width: 100%; padding: 1.125rem 1rem; top: 0; z-index: 10; }
 .num{ font-family: var(--numeric); font-weight: 800;}
 .completeBox{ height: 4rem; width: 100%; display: flex; align-items: center; justify-content: center; }
 .completeBox.noDisplay{ display: none; }
