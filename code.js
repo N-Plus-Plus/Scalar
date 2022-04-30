@@ -29,8 +29,8 @@ function clicked(e){
     if( c.contains(`autoBuy`) ){ pauseAuto( t.getAttribute(`data-auto`) ); }
     if( c.contains(`ring`) ){ pauseAuto( v.selected, t.getAttribute(`data-ring` ) ); }
     if( c.contains(`slot`) && v.jerkSelected !== null ){ assignJerk( v.jerkSelected, t.getAttribute(`data-slot` ) ); }
-    if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
-    if( c.contains(`tooltip`) ){
+    else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
+    else if( c.contains(`tooltip`) ){
         t = t.parentElement;
         c = t.classList;
         if( c.contains(`upgrade`) ){ buyUpgrade( t.getAttribute(`data-upspan`), t.getAttribute(`data-uptype`), t.getAttribute(`data-uptier`) ); }
@@ -39,6 +39,7 @@ function clicked(e){
         else if( c.contains(`slot`) && v.jerkSelected == null ){ unassignJerk( t.getAttribute(`data-slot` ) ); }
         else{ clearJerkSelect(); }
     }
+    else{ clearJerkSelect(); }
 }
 
 function pressed(e){
@@ -381,8 +382,7 @@ function buildTabContents( n, x ){
         t.appendChild( buildAssignBox() );
         t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
         t.appendChild( buildRosterBox() );
-        t.appendChild( elem( `smallSpanLabel`, `<a class="combined">Recreate Force for ${numDisplay( global.recreateCost + v.recreates )} <div class="points costIcon"></div></a>` ) );
-        t.appendChild( elem( `recreate` ) );
+        t.appendChild( elem( `lastSpanLabel`, `<a class="combined">Spend ${numDisplay( global.recreateCost + v.recreates )}<div class="points costIcon"></div> to recreate a Cosmic Force:</a><div class="recreate"></div>` ) );
         v.tab = `points`;
         buildTooltips();
         populateTooltips();
@@ -874,8 +874,8 @@ const gg = [`I`,`II`,`III`,`IV`,`V`,`VI`,`VII`,`VIII`,`IX`,`X`];
 const jerkTraits = [
     { id: `fastBuy`, significance: 0.05, scope: `tier`, verbiage: `#% faster @ auto-buy` }
     , { id: `moreOutput`, significance: 0.1, scope: `tier`, verbiage: `#% more output from @` }
-    , { id: `lessScale`, significance: 0.05, scope: `tier`, verbiage: `#% slower scaling on @` }
-    , { id: `flatDiscount`, significance: 0.05, scope: `tier`, verbiage: `#% discount on @` }
+    , { id: `lessScale`, significance: 0.05, scope: `tier`, verbiage: `#% slower cost scaling on @` }
+    , { id: `flatDiscount`, significance: 0.05, scope: `tier`, verbiage: `#% discount on @ cost` }
     // , { id: `boughtBoost`, significance: 1, scope: `tier` }  // move to span tier upgrade
     , { id: `overallOutput`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% more output` }
     // , { id: `startCash`, significance: 0.25, scope: `span` }
