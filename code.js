@@ -312,7 +312,7 @@ function clearJerkSelect(){
     v.jerkSelected = null;
     let slots = document.querySelectorAll(`.slot`);
     for( let i = 0; i < slots.length; i++ ){ slots[i].classList.remove(`selectedSlot`); }
-    document.querySelector(`.recreate`).classList.remove(`selectedSlot`);
+    if( document.querySelector(`.recreate`) !== null ){ document.querySelector(`.recreate`).classList.remove(`selectedSlot`); }
 }
 
 function assignJerk( j, s ){
@@ -831,8 +831,8 @@ const upgrades = [
     {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       math: `add`,        nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
     , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       math: `multiply`,   nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 5%` } // consider making Span rather than Global
     , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     math: `multiply`,   nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
-    , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Max Force Traits`,   tooltip: `Increase the number of Traits a Force can have by 1` } //
-    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     math: `add`,        nice: `Recruit Force`,      tooltip: `Add one Cosmic Force to your roster` } 
+    , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
+    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     math: `add`,        nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` } 
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     math: `multiply`,   nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
     , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       math: `divide`,     nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 10%` } //
     , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     math: `subtract`,   nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
