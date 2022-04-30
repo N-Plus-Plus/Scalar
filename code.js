@@ -85,6 +85,9 @@ function progress(){
                 case `balance`:
                     v.runs[r].quest.progress = Math.min( 1, balance( r ) / v.runs[r].quest.target );
                 break;
+                case `own`:
+                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen.reduce( ( a, b ) => a + b ) / v.runs[r].quest.target );
+                break;
                 case `gained`:
                     v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.gained / v.runs[r].quest.target );
                 break;
@@ -871,6 +874,7 @@ const questDef = [
     , { basis: `balance`,   target: 1e6, verbiage: `Hold N Q` }
     , { basis: `cps`,       target: 1e4, verbiage: `Reach N Q Per Second` }
     , { basis: `spent`,     target: 5e6, verbiage: `Spend N Q` }
+    , { basis: `own`,       target: 250, verbiage: `Own N Q Generators` }
     , { basis: `buy1Gen`,   target: [{a:70,t:0},{a:65,t:1},{a:60,t:2},{a:55,t:3},{a:50,t:4},{a:45,t:5},{a:40,t:6},{a:30,t:7},{a:20,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators`}
     , { basis: `buyNGen`,   target: [{a:55,t:1},{a:50,t:2},{a:45,t:3},{a:40,t:4},{a:35,t:5},{a:30,t:6},{a:25,t:7},{a:15,t:8},{a:5,t:9}], verbiage: `Buy N Tier I to $ Generators`}
     // spend 500 Thousand Q in a single purchase
@@ -1053,6 +1057,10 @@ More Complex Quests
 More Upgrade types
 
 Make marqueee CSS based and spawn properly
+
+Fastest Quantum Lap does something?
+Tier Upgrade - Head Start - Scales cost the same as buying them for reals
+Auto-Complete bar-fill (black to white)
 
 
 Uncertainty     None
