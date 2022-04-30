@@ -750,7 +750,7 @@ function loadState(){
     let store = JSON.parse( localStorage.getItem( `v` ) );
     if( store !== null ){
         if( store.version !== v.version ){ display( v.selected ); } // loop load data
-        else{ v = store; buildUpgrades(); display( v.selected ); }
+        else{ v = store; buildUpgrades(); display( v.selected ); dataFix(); }
     }
     else{
         v.ms.start = new Date().getTime() / global.tickSpeed;
@@ -760,6 +760,10 @@ function loadState(){
         display( 0 );
     }
     setIco( v.watermark );
+}
+
+function dataFix(){
+    delete v.upgrades.rosterSize;
 }
 
 function resetData(){
