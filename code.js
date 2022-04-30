@@ -28,15 +28,17 @@ function clicked(e){
     if( c.contains(`miniTab`) ){ selectMiniTab( t.getAttribute(`data-minitab`), t.getAttribute(`data-span`) ); }
     if( c.contains(`autoBuy`) ){ pauseAuto( t.getAttribute(`data-auto`) ); }
     if( c.contains(`ring`) ){ pauseAuto( v.selected, t.getAttribute(`data-ring` ) ); }
+    if( c.contains(`slot`) && v.jerkSelected !== null ){ assignJerk( v.jerkSelected, t.getAttribute(`data-slot` ) ); }
+    if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
     if( c.contains(`tooltip`) ){
         t = t.parentElement;
         c = t.classList;
         if( c.contains(`upgrade`) ){ buyUpgrade( t.getAttribute(`data-upspan`), t.getAttribute(`data-uptype`), t.getAttribute(`data-uptier`) ); }
-        if( c.contains(`unassigned`) ){ selectJerk( t.getAttribute(`data-jerk` ) ); }
+        if( c.contains(`slot`) && v.jerkSelected !== null ){ assignJerk( v.jerkSelected, t.getAttribute(`data-slot` ) ); }
+        else if( c.contains(`unassigned`) ){ selectJerk( t.getAttribute(`data-jerk` ) ); }
         else if( c.contains(`slot`) && v.jerkSelected == null ){ unassignJerk( t.getAttribute(`data-slot` ) ); }
         else{ clearJerkSelect(); }
     }
-    if( c.contains(`slot`) && v.jerkSelected !== null ){ assignJerk( v.jerkSelected, t.getAttribute(`data-slot` ) ); }
 }
 
 function pressed(e){
@@ -300,6 +302,7 @@ function selectJerk( j ){
     document.querySelector(`[data-jerk="${v.jerkSelected}"]`).classList.add(`selectedJerk`);
     let slots = document.querySelectorAll(`.slot`);
     for( let i = 0; i < slots.length; i++ ){ slots[i].classList.add(`selectedSlot`); }
+    document.querySelector(`.recreate`).classList.add(`selectedSlot`);
 }
 
 function clearJerkSelect(){
@@ -308,6 +311,7 @@ function clearJerkSelect(){
     v.jerkSelected = null;
     let slots = document.querySelectorAll(`.slot`);
     for( let i = 0; i < slots.length; i++ ){ slots[i].classList.remove(`selectedSlot`); }
+    document.querySelector(`.recreate`).classList.remove(`selectedSlot`);
 }
 
 function assignJerk( j, s ){
@@ -356,7 +360,7 @@ function buildTabContents( n, x ){
     let t = document.querySelector(`[data-upgrades]`);
     t.innerHTML = ``;
     if( n == `points` ){
-        t.appendChild( elem( `upgradeHeading spanLabel`, `Global Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
+        t.appendChild( elem( `upgradeHeading spanLabel`, `Global Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="threeQuartCell">Cost</div></div>` ) );
         for( k in Object.keys( v.upgrades ) ){
             let ch = Object.keys(v.upgrades)[k];
             let subj = upgrades.filter( (e) => e.id == ch )[0];
@@ -367,7 +371,7 @@ function buildTabContents( n, x ){
                     if( upgradeAfford( null, subj.id, null ) ){ r.lastChild.classList.add(`affordable`); }
                     r.appendChild( elem( `label bigCell`, subj.nice ) );
                     r.appendChild( elem( `stat halfCell`, v.upgrades[ch] ) );
-                    r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
+                    r.appendChild( elem( `stat threeQuartCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
                     t.appendChild(r);
                 }
             }
@@ -377,6 +381,8 @@ function buildTabContents( n, x ){
         t.appendChild( buildAssignBox() );
         t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
         t.appendChild( buildRosterBox() );
+        t.appendChild( elem( `smallSpanLabel`, `<a class="combined">Recreate Force for ${numDisplay( global.recreateCost + v.recreates )} <div class="points costIcon"></div></a>` ) );
+        t.appendChild( elem( `recreate` ) );
         v.tab = `points`;
         buildTooltips();
         populateTooltips();
@@ -707,8 +713,21 @@ function getTarget( d ){
     return o;
 }
 
-function recruitJerk(){
+function recruitJerk(){    
     v.roster.push( new Jerk );
+}
+
+function recreateJerk( j ){
+    let c = global.recreateCost + v.recreates;
+    if( v.curr.gained - v.curr.spent >= c ){
+        v.curr.spent += c;
+        v.recreates++;
+        let id = JSON.parse( JSON.stringify( v.roster[j].id ) );
+        v.roster[j] = new Jerk( id );
+        displayRewards();
+        selectTab( v.tab );
+    }
+    clearJerkSelect();
 }
 
 function getReruitCost(){
@@ -764,6 +783,7 @@ function loadState(){
 
 function dataFix(){
     delete v.upgrades.rosterSize;
+    if( v.recreates == undefined ){ v.recreates = 0; }
 }
 
 function resetData(){
@@ -789,6 +809,7 @@ var v = {
     , spawnChance: 1 / 10000
     , watermark: 0    
     , multi: 0
+    , recreates: 0
 }
 
 const global = {
@@ -803,6 +824,7 @@ const global = {
     , buyEvery: 1
     , minRoster: 1
     , scrollSpeed: 3
+    , recreateCost: 5
 }
 
 const upgrades = [
@@ -904,8 +926,9 @@ class Run{
 }
 
 class Jerk{
-    constructor(){
+    constructor( id ){
         this.id = String.fromCharCode( 945 + v.roster.length );
+        if( id !== undefined ){ this.id = id; }
         this.traitCount = traitCount();
         this.buyType = shuffle([`ascending`, `descending`, `cheapest`, `dearest`, `random`])[0];
         this.trait = [];
@@ -913,12 +936,12 @@ class Jerk{
         for( let i = 0; i < this.traitCount; i++ ){
             let selection = shuffle(jerkTraits)[0];
             let nonce = Math.random() * 10;
-            let amt = Math.ceil( nonce / Math.pow( 1.25, this.traitCount ) ) * selection.significance;
+            let amt = Math.ceil( nonce ) * selection.significance;
             let t = Math.floor( Math.random() * stat.length );
             this.trait.push( 
                 { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(0) ).replace( `@`, gen[t] )
                 } );
-            strength += Math.ceil( nonce / Math.pow( 1.25, this.traitCount ) );
+            strength += Math.ceil( nonce );
         }
         this.strength = strength / this.traitCount;
         this.assignment = null;

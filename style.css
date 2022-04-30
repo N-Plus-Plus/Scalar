@@ -47,8 +47,9 @@ span{ width: 100%; height: 100%; }
 .stat{ font-family: var(--numeric); font-weight: 800;}
 .tableHeadings,.tableRow{ display: flex; height: 2rem; margin: 0 0 1rem 0; }
 .heading,.cell{ width: 6rem; display: flex; align-items: center; justify-content: center;}
-.bigCell{ width: 12rem; height: 2.25rem; display: flex; align-items: center; justify-content: flex-start; padding-left: 1rem;}
+.bigCell{ width: 10rem; height: 2.25rem; display: flex; align-items: center; justify-content: flex-start; padding-left: 1rem;}
 .halfCell{ width: 4rem; display: flex; align-items: center; justify-content: center;}
+.threeQuartCell{ width: 6rem; display: flex; align-items: center; justify-content: center;}
 .heading.long,.cell.long{ width: 7.5rem; }
 .main{ min-width: 30rem; background-color: #0006; }
 .button{ justify-content: center; background-color: var(--invis); height: 2rem; width: 7.5rem; border: solid 1px white; color: var(--lgrey)}
@@ -89,10 +90,11 @@ span{ width: 100%; height: 100%; }
 .rewardIcon{ width: 1rem; height: 1rem; margin: 0 0 0 0.5rem; pointer-events: none;}
 .headingIcon{ width: 1rem; height: 1rem; margin: 0 0 0 0.5rem; height:100%}
 .inlineHeadings{ font-size: 0.8rem; display: flex; }
-.rosterBox{ display: flex; flex-wrap: wrap; margin: 0 0 1rem 0; min-height: 2rem; }
+.rosterBox{ display: flex; flex-wrap: wrap; margin: 0 0 1rem 0; min-height: 2rem; max-width: 25rem;}
 .assignBox{ display: flex; min-height: 2rem; align-items: center; justify-content: flex-start; }
 .slot{ width: 2rem; height: 2rem; border: solid white 1px; background-size: 40%; margin: 1rem 0.5rem 0 0; position: relative; }
-.slot.filled{ background-size: 400%; cursor: pointer; }
+.recreate{ background-image: url(./recreate.png); width: 2rem; height: 2rem; border: solid white 1px; margin: 1rem 0.5rem 0 0; }
+.slot.filled{ background-size: 500%; cursor: pointer; }
 .jerk.unassigned{ width: 2rem; height: 2rem; }
 /* .assigned{ width: 2rem; height: 2rem; position: absolute; top: 0; left: 0; } */
 .jerk.assigned{ width: 2rem; height: 2rem; position: absolute; top: 0; left: 0; margin: -1px; pointer-events: none; }
@@ -116,7 +118,7 @@ circle.paused{ opacity: 0.25;}
 .jerk{ background-image: url(./jerk.png); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; padding-bottom: 0.1rem; margin: 1rem 0.5rem 0 0; cursor: pointer; position: relative;}
 .autoBuy{ background-image: url(./autoBuy.png); cursor: pointer; }
 
-.selectedJerk,.selectedSlot{ filter: drop-shadow( 0 0 0.25rem white );}
+.selectedJerk,.selectedSlot{ filter: drop-shadow( 0 0 0.25rem white ); z-index: 1; cursor: pointer; }
 
 .tooltip { display:inline-block; position:absolute; font-size: 0.8rem; }
 .tooltip .bottom { min-width: 15rem; top: 40px; left: 50%; transform: translate(-50%, 0); padding: 1rem; background-color:#000; border-radius:8px; position:absolute; z-index:15; box-sizing:border-box; opacity:0; transition:opacity 0.5s; }
@@ -128,3 +130,5 @@ circle.paused{ opacity: 0.25;}
 footer{ position: absolute; bottom: 0; left: -50%; height: 3rem; width: 200%; z-index: 1; display: flex; align-items: flex-end; justify-content: flex-start; padding: 1rem; background-color: #0009; }
 .scroll{ transition: transform 50ms; pointer-events: none; display: flex;}
 .inlineIcon{ height: 1rem; width: 1rem; margin: 0 0.5rem; }
+.costIcon{ height: 1.25rem; width: 1.25rem; margin: 0 0.5rem; }
+.combined{ display: flex;}
