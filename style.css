@@ -120,7 +120,7 @@ circle.paused{ opacity: 0.25;}
 .selectedJerk,.selectedSlot{ filter: drop-shadow( 0 0 0.25rem white );}
 
 .tooltip { display:inline-block; position:absolute; font-size: 0.8rem; }
-.tooltip .bottom { min-width: 12.5rem; top: 40px; left: 50%; transform: translate(-50%, 0); padding: 1rem; background-color:#000; border-radius:8px; position:absolute; z-index:15; box-sizing:border-box; opacity:0; transition:opacity 0.5s; }
+.tooltip .bottom { min-width: 15rem; top: 40px; left: 50%; transform: translate(-50%, 0); padding: 1rem; background-color:#000; border-radius:8px; position:absolute; z-index:15; box-sizing:border-box; opacity:0; transition:opacity 0.5s; }
 .tooltip:hover .bottom { opacity:1; }
 .tooltip .bottom i { position:absolute; bottom:100%; left:50%; margin-left:-12px; width:24px; height:12px; overflow:hidden; }
 .tooltip .bottom i::after { content:''; position:absolute; width:12px; height:12px; left:50%; transform:translate(-50%,50%) rotate(45deg); background-color:#000; }

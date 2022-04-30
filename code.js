@@ -214,7 +214,7 @@ function complete( index, auto ){
     topUpZeros();
     spawnCheck();
     if( !auto ){ display( 0 ); }
-    else if( index == v.selected ){ display( 0 ); }
+    else if( index == v.selected ){ display( 0 ); display( 0 ); }
     else if( v.selected >= index ){ v.selected = parseInt( v.selected ) - 1; }
     displayRuns();
     displayWings();
@@ -375,12 +375,12 @@ function buildTabContents( n, x ){
                 }
             }
         }
-        t.appendChild( elem( `upgradeHeading spanLabel`, `Cosmic Forces<div class="smaller">${numDisplay( v.roster.length)} / ${numDisplay( getRosterSize() )}</div>` ) );
+        t.appendChild( elem( `upgradeHeading spanLabel`, `Cosmic Forces` ) ); //<div class="smaller">${numDisplay( v.roster.length)}</div>
         t.appendChild( elem( `smallSpanLabel`, `Force Assignments` ) );
         t.appendChild( buildAssignBox() );
         t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
         t.appendChild( buildRosterBox() );
-        if( v.roster.length >= getRosterSize() ){ document.querySelector(`[data-uptype="recruitJerk"]`).parentElement.classList.add(`halfVis`); }
+        // if( v.roster.length >= getRosterSize() ){ document.querySelector(`[data-uptype="recruitJerk"]`).parentElement.classList.add(`halfVis`); }
         v.tab = `points`;
         buildTooltips();
         populateTooltips();
@@ -527,7 +527,7 @@ function buildContents( index ){
             bR.appendChild( elem( `button cell long`, gen[i], [[`buy`, i],[`index`,index]] ) );
             bR.appendChild( elem( `stat cell`, numDisplay( v.runs[index].gen[i] ) ) );
             bR.appendChild( elem( `stat cell`, numDisplay( cost( index, i ) ) ) );
-            bR.appendChild( elem( `stat cell`, numDisplay( getSingleCPS( index, i ) ) ) );
+            bR.appendChild( elem( `stat cell`, numDisplay( getSingleCPS( index, i ), true ) ) );
             bR.appendChild( elem( ``, ``, [[`ringMe`,i]]) );
             b.appendChild( bR );
         }
@@ -594,7 +594,7 @@ function scrollScroll(){
         s[i].setAttribute( `data-transform`, newT );
         s[i].style = `transform: translate( ${newT}px, 0px )`;
         if( newT <= 0 ){
-            s[i].parentElement.removeChild(s[i]);
+            document.querySelector(`#footer`).innerHTML = ``;
             addScroll();
         }
     }
@@ -603,6 +603,7 @@ function scrollScroll(){
 function addScroll(){
     let v = shuffle(helpful)[0];
     document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,window.innerWidth * 2]] ) );
+    scrollScroll();
 }
 
 function spawnClickMe(){
@@ -711,7 +712,8 @@ function getTarget( d ){
 }
 
 function recruitJerk(){
-    if( v.roster.length < getRosterSize() ){ v.roster.push( new Jerk ); }
+    // if( v.roster.length < getRosterSize() ){ v.roster.push( new Jerk ); }
+    v.roster.push( new Jerk );
 }
 
 function getReruitCost(){
@@ -719,7 +721,7 @@ function getReruitCost(){
 }
 
 function getRosterSize(){
-    return global.minRoster + v.upgrades.rosterSize;
+    return global.minRoster + v.upgrades.rosterSize + 9999;
 }
 
 function nextDef( d ){
@@ -984,12 +986,15 @@ function shuffle( a ) {
     return a;
 }
 
-function numDisplay( x ){
-    x = Math.floor( x ).toFixed(0);
+function numDisplay( x, precise ){
+    let precision = 0;
+    if( precise ){ precision = Math.max( 0, 3 - String(x).split(`.`)[0].length ); }
+    let remainder = String(x).split(`.`)[1];
+    o = Math.floor( x ).toFixed(0);
     var pattern = /(-?\d+)(\d{3})/;
-    while( pattern.test( x ) )
-        x = x.replace( pattern, "$1,$2" );
-    return x;
+    while( pattern.test( o ) ){ o = o.replace( pattern, "$1,$2" ); }
+    if( precision !== 0 && remainder !== undefined ){ o = o + `.` + remainder.substring( 0, 0 + precision ); }
+    return o;
 }
 
 const helpful = [
