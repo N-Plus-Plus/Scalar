@@ -26,7 +26,7 @@ function clicked(e){
     if( c.contains(`selector`) ){ display( t.getAttribute(`data-select`) ); }
     if( c.contains(`tab`) ){ selectTab( t.getAttribute(`data-tab`) ); }
     if( c.contains(`miniTab`) ){ selectMiniTab( t.getAttribute(`data-minitab`), t.getAttribute(`data-span`) ); }
-    if( c.contains(`autoBuy`) ){ pauseAuto( t.getAttribute(`data-auto`) ); }
+    if( c.contains(`autoBuy`) ){ pauseAuto( v.selected ); }
     if( c.contains(`ring`) ){ pauseAuto( v.selected, t.getAttribute(`data-ring` ) ); }
     if( c.contains(`slot`) && v.jerkSelected !== null ){ assignJerk( v.jerkSelected, t.getAttribute(`data-slot` ) ); }
     else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
