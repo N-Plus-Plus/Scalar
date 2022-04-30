@@ -94,6 +94,13 @@ function progress(){
                 case `buy1Gen`:
                     let t = v.runs[r].quest.tier;
                     v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen[t] / Math.floor( v.runs[r].quest.target ) );
+                    break;
+                case `buyNGen`:
+                    let ts = v.runs[r].quest.tier;
+                    let tt = Math.floor( v.runs[r].quest.target ) * ( ts + 1 );
+                    let ta = 0;
+                    for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
+                    v.runs[r].quest.progress = Math.min( 1, ta / tt );
                 break;
             }            
             if( v.runs[r].quest.progress == 1 ){
@@ -382,7 +389,7 @@ function buildTabContents( n, x ){
         t.appendChild( buildAssignBox() );
         t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
         t.appendChild( buildRosterBox() );
-        t.appendChild( elem( `lastSpanLabel`, `<a class="combined">Spend ${numDisplay( global.recreateCost + v.recreates )}<div class="points costIcon"></div> to recreate a Cosmic Force:</a><div class="recreate"></div>` ) );
+        t.appendChild( elem( `smallSpanLabel`, `<a class="combined">Spend ${numDisplay( global.recreateCost + v.recreates )}<div class="points costIcon"></div> to recreate a Cosmic Force:</a><div class="recreate"></div>` ) );
         v.tab = `points`;
         buildTooltips();
         populateTooltips();
@@ -509,7 +516,7 @@ function buildContents( index ){
         q.appendChild( elem( `questText`, v.runs[index].quest.verbiage
         .replace(`Q`,span[v.runs[index].span].curr)
         .replace(`N`,numDisplay( v.runs[index].quest.target ) )
-        .replace(`T`, gen[v.runs[index].quest.tier] ) ) );
+        .replace(`$`, gen[v.runs[index].quest.tier] ) ) );
         h.appendChild( q );
     o.appendChild( h );
     let s = elem( `statBox` );
@@ -562,7 +569,7 @@ function forgeRings(){
     offsetRings();
 }
 
-function offsetRings(){
+function offsetRings(){ // TODO Make this not rely on the dom, but cycle through 10 and grab elements as needed
     if( v.selected !== null ){
         let circs = document.querySelectorAll(`[data-circle]`);
         for( let i = 0; i < circs.length; i++ ){
@@ -863,7 +870,8 @@ const questDef = [
     , { basis: `balance`,   target: 1e6, verbiage: `Hold N Q` }
     , { basis: `cps`,       target: 1e4, verbiage: `Reach N Q Per Second` }
     , { basis: `spent`,     target: 5e6, verbiage: `Spend N Q` }
-    , { basis: `buy1Gen`,   target: [{a:70,t:0},{a:65,t:1},{a:60,t:2},{a:55,t:3},{a:50,t:4},{a:45,t:5},{a:40,t:6},{a:30,t:7},{a:20,t:8},{a:10,t:9}], verbiage: `Buy N T Generators`}
+    , { basis: `buy1Gen`,   target: [{a:70,t:0},{a:65,t:1},{a:60,t:2},{a:55,t:3},{a:50,t:4},{a:45,t:5},{a:40,t:6},{a:30,t:7},{a:20,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators`}
+    , { basis: `buyNGen`,   target: [{a:65,t:1},{a:60,t:2},{a:55,t:3},{a:50,t:4},{a:45,t:5},{a:40,t:6},{a:30,t:7},{a:20,t:8},{a:10,t:9}], verbiage: `Buy N Tier I to $ Generators`}
     // buy N Generators of Tier Y through Z
     // spend 500 Thousand Q in a single purchase
 ]
@@ -890,6 +898,11 @@ class Quest{
             let n = Math.floor( Math.random() * q.target.length );
             this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.05, v.upgrades.questTarget ) );
             this.tier = q.target[n].t;
+        }
+        else if( q.basis == `buyNGen` ){
+            let n = Math.floor( Math.random() * q.target.length );
+            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.05, v.upgrades.questTarget ) );
+            this.tier = q.target[n].t;            
         }
         else{
             this.target = Math.floor( q.target * Math.pow( global.scale.span, w ) ) / Math.pow( 1.05, v.upgrades.questTarget );
@@ -1036,26 +1049,9 @@ const helpful = [
 
 TODO
 Run progress bar in side menu
-Cap and drip release Def above the first (so you can't have seven)
-Managers...
 More Complex Quests
 More Upgrade types
-Rewards random-spawn
 
-Anti-matter
-Energy
-Dark Energy
-Dark Matter
-
-
-~~ UPGRADES ~~
-~ DEF ~
-Reduce scaling severity of each Tier
-
-
-Per managed def auto-buyer timer + bar
-- decide on next purchase (show it)
-- count down to buy
-- attempt a buy (can fail if user is active)
+Make marqueee CSS based and spawn properly
 
 */
