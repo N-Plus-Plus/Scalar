@@ -171,6 +171,7 @@ function cost( index, g ){
     for( a in tr ){
         if( tr[a].id == `lessScale` && g == tr[a].t ){ div *= ( 1 + tr[a].amt ); }
         if( tr[a].id == `flatDiscount` && g == tr[a].t ){ multi *= ( 1 - tr[a].amt ); }
+        if( tr[a].id == `overallDiscount` && g == tr[a].t ){ multi *= ( 1 - tr[a].amt ); }
     }
     let d = 1 / ( 1 + ( v.upgrades[v.runs[index].span].creepReduce[g] * 0.1 ) ) / div;
     return Math.pow( Math.pow( global.scale.buy, d ), n ) * ( stat[g].cost * multi );
@@ -794,7 +795,10 @@ function autoBuyTime( d, t ){
     let o = global.autoBuy + global.autoBuy * ( t + 1 ) / 2;
     o *= Math.pow( 1 / 1.05, v.upgrades[d].autoBuy[t] );
     let tr = getTraits( d );
-    for( a in tr ){ if( tr[a].id == `fastBuy` ){ o *= ( 1 - tr[a].amt ) } }
+    for( a in tr ){
+        if( tr[a].id == `fastBuy` ){ o *= ( 1 - tr[a].amt ) }
+        if( tr[a].id == `fastOverall` ){ o *= ( 1 - tr[a].amt ) }
+    }
     o *= ( 1000 / global.tickSpeed );
     o = Math.ceil( o );
     return o;
@@ -915,13 +919,14 @@ const chance = [1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,
 
 const jerkTraits = [
     { id: `fastBuy`, significance: 0.05, scope: `tier`, verbiage: `#% faster @ auto-buy` }
+    , { id: `fastOverall`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% faster auto-buy` }
+    , { id: `overallDiscount`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% discount on cost` }
+    , { id: `overallOutput`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% more output` }
     , { id: `moreOutput`, significance: 0.1, scope: `tier`, verbiage: `#% more output from @` }
     , { id: `lessScale`, significance: 0.05, scope: `tier`, verbiage: `#% slower cost scaling on @` }
     , { id: `flatDiscount`, significance: 0.05, scope: `tier`, verbiage: `#% discount on @ cost` }
     // , { id: `boughtBoost`, significance: 1, scope: `tier` }  // move to span tier upgrade
-    , { id: `overallOutput`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% more output` }
-    // , { id: `startCash`, significance: 0.25, scope: `span` }
-    // , { id: `questEase`, significance: 0.025, scope: `span` }
+    // , { id: `delayScale`, significance: 1, scope: `tier` }
 ]
 
 class Quest{
