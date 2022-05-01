@@ -628,21 +628,19 @@ function updateButtons(){
 }
 
 function scrollScroll(){
-    let s = document.querySelectorAll(`.scroll`);
-    for( let i = 0; i < s.length; i++ ){
-        let newT = parseFloat( s[i].getAttribute(`data-transform`) ) - global.scrollSpeed;
-        s[i].setAttribute( `data-transform`, newT );
-        s[i].style = `transform: translate( ${newT}px, 0px )`;
-        if( newT <= 0 ){
-            document.querySelector(`#footer`).innerHTML = ``;
-            addScroll();
-        }
+    let s = document.querySelector(`.scroll`);
+    let newT = parseFloat( s.getAttribute(`data-transform`) ) - global.scrollSpeed;
+    s.setAttribute( `data-transform`, newT );
+    s.style = `transform: translate( ${newT}px, 0px )`;
+    if( newT <= document.querySelector(`.scroll`).clientWidth * -1 - 100 ){
+        document.querySelector(`#footer`).innerHTML = ``;
+        addScroll();
     }
 }
 
 function addScroll(){
     let v = shuffle(helpful)[0];
-    document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,window.innerWidth * 2]] ) );
+    document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,window.innerWidth]] ) );
     scrollScroll();
 }
 
@@ -993,7 +991,7 @@ class Jerk{
                 { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(0) ).replace( `@`, gen[t] )
                 } );
             strength += Math.ceil( nonce );
-        }
+        }        
         this.strength = strength / this.traitCount;
         this.assignment = null;
     }
@@ -1088,13 +1086,10 @@ const helpful = [
 TODO
 Run progress bar in side menu
 More Complex Quests
-More Upgrade types
-
+Deduplicate and sort Jerk Traits
 Make marqueee CSS based and spawn properly
-
 Fastest Quantum Lap does something?
-Tier Upgrade - Head Start - Scales cost the same as buying them for reals
-Auto-Complete bar-fill (black to white)
+Prestige
 
 
 Uncertainty     None
