@@ -176,6 +176,11 @@ function cost( index, g ){
     return Math.pow( Math.pow( global.scale.buy, d ), n ) * ( stat[g].cost * multi );
 }
 
+function uCost( span, g ){
+    let n = v.upgrades[span].headStart[g];
+    return Math.pow( global.scale.headStart, n ) * stat[g].cost;
+}
+
 function balance( index, clean ){
     let o = v.runs[index].curr.gained - v.runs[index].curr.spent;
     if( clean == true ){ o = parseInt( o.toFixed(0) ); }
@@ -191,7 +196,7 @@ function completeBalance( k ){
 
 function updateCPS( index ){
     let cps = 0;
-    for( i in v.runs[index].gen ){        
+    for( i in v.runs[index].gen ){
         cps += getCPS( index, i, false );
     }
     v.runs[index].curr.cps = Math.floor( cps );
@@ -252,17 +257,22 @@ function resetHold(){
 
 function spawnCheck(){
     for( r in v.completed ){
-        let target = getTarget( nextDef( r ) );
+        let nxt = nextDef( r );
+        let target = getTarget( nxt );
         if( v.completed[r] >= target ){
             v.completed[r] -= target;
-            v.runs.push( new Run( nextDef( r ) ) );
+            v.runs.push( new Run( nxt ) );
+            updateCPS( v.runs.length - 1 );
         }
     }
 }
 
 function topUpZeros(){
     let h = calcZeros() - v.runs.filter( (e) => e.span == 0 ).length;
-    for( let i = 0; i < h; i++ ){ v.runs.push( new Run( 0 ) ); }
+    for( let i = 0; i < h; i++ ){
+        v.runs.push( new Run( 0 ) );
+        updateCPS( v.runs.length - 1 );
+    }
 }
 
 function clickReward( type, t ){
@@ -696,6 +706,7 @@ function upgradeCost( d, type, tier ){
     else{ bought = v.upgrades[d][type][tier]; }
     let u = upgrades.filter( (e) => e.id == type )[0];
     let c = Math.ceil( u.cost * Math.pow( u.multi, bought ) );
+    if( type == `headStart` ){ c = uCost( d, tier ); }
     return c;
 }
 
@@ -841,7 +852,7 @@ var v = {
 }
 
 const global = {
-    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5 } // 1.05361025 to reach 250k
+    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5, headStart: 1.25 } // 1.05361025 to reach 250k
     , tickSpeed: 50
     , spanTarget: 5
     , zeros: 1
@@ -860,7 +871,7 @@ const upgrades = [
     , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       math: `multiply`,   nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 5%` } // consider making Span rather than Global
     , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     math: `multiply`,   nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
     , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
-    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     math: `add`,        nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` } 
+    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     math: `add`,        nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     math: `multiply`,   nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
     , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       math: `divide`,     nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 10%` } //
     , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     math: `subtract`,   nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
@@ -868,6 +879,7 @@ const upgrades = [
     , { id: `scaleDelay`,   scope: `tier`,      cost: 5,    benefit: 1,     multi: 1.5,     math: `add`,        nice: `Scale Delay`,        tooltip: `Delay the start of cost scaling by 1 (more)` } //
     , { id: `creepReduce`,  scope: `tier`,      cost: 10,   benefit: 1.05,  multi: 2.5,     math: `divide`,     nice: `Cost Scaling`,       tooltip: `Reduce the amount by which costs scale by 5%` } //
     , { id: `bulkBonus`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       math: `multiply`,   nice: `Bulk Bonus`,         tooltip: `Increase output by 0.5% × total owned` } // power of a power - be careful with scaling
+    , { id: `headStart`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       math: `multiply`,   nice: `Head Start`,         tooltip: `Start with 1 (more) Generator of this Tier owned` }
     // clickMe tilting
 ]
 
@@ -943,8 +955,8 @@ class Run{
         this.gen = [];
         this.auto = {};
         this.autoOverride = [];
-        for( let i = 0; i < global.scale.ranks; i++ ){
-            this.gen.push( 0 );
+        for( let i = 0; i < global.scale.ranks; i++ ){            
+            this.gen.push( v.upgrades[d].headStart[i] );
             if( v.upgrades[d].autoBuy[i] == 0 ){ this.auto[`t${i}`] = null; }
             else{ this.auto[`t${i}`] = autoBuyTime( d, i ); }
             this.autoOverride.push(false);
