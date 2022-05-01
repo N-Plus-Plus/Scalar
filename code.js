@@ -171,7 +171,7 @@ function cost( index, g ){
     for( a in tr ){
         if( tr[a].id == `lessScale` && g == tr[a].t ){ div *= ( 1 + tr[a].amt ); }
         if( tr[a].id == `flatDiscount` && g == tr[a].t ){ multi *= ( 1 - tr[a].amt ); }
-        if( tr[a].id == `overallDiscount` && g == tr[a].t ){ multi *= ( 1 - tr[a].amt ); }
+        if( tr[a].id == `overallDiscount` ){ multi *= ( 1 - tr[a].amt ); }
     }
     let d = 1 / ( 1 + ( v.upgrades[v.runs[index].span].creepReduce[g] * 0.1 ) ) / div;
     return Math.pow( Math.pow( global.scale.buy, d ), n ) * ( stat[g].cost * multi );
@@ -539,14 +539,14 @@ function buildContents( index ){
     q.appendChild( q3 );
     q.appendChild( elem( `questText`, v.runs[index].quest.verbiage
     .replace(`Q`,qq)
-    .replace(`!`,span[v.runs[index].span].curr)
+    .replace(`!`,q2)
     .replace(`N`,numDisplay( v.runs[index].quest.target ) )
     .replace(`$`, gen[v.runs[index].quest.tier] ) ) );
     h.appendChild( q );
     o.appendChild( h );
     let s = elem( `statBox` );
         s.appendChild( elem( `statRow`, `${span[v.runs[index].span].curr} Held: <a class="num" data-balance=${index}>${numDisplay( balance( index ) )}</a>` ) );
-        s.appendChild( elem( `statRow`, `${span[v.runs[index].span].curr} Per Second: <a class="num" data-cps=${index}>${numDisplay( v.runs[index].curr.cps )}</a>` ) );
+        s.appendChild( elem( `statRow`, `${span[v.runs[index].span].curr} Per Second: <a class="num" data-cps=${index}>${numDisplay( v.runs[index].curr.cps, true )}</a>` ) );
     o.appendChild( s );
     let b = elem( `tableBox` );
     let bH = elem( `tableHeadings` );
@@ -594,15 +594,16 @@ function forgeRings(){
     offsetRings();
 }
 
-function offsetRings(){ // TODO Make this not rely on the dom, but cycle through 10 and grab elements as needed
+function offsetRings(){
     if( v.selected !== null ){
-        let circs = document.querySelectorAll(`[data-circle]`);
-        for( let i = 0; i < circs.length; i++ ){
-            if( v.upgrades[v.runs[v.selected].span].autoBuy[i] == 0 ){ circs[i].classList.add(`noDisplay`); }
+        for( let i = 0; i < stat.length; i++ ){
+            if( v.upgrades[v.runs[v.selected].span].autoBuy[i] == 0 ){
+                document.querySelector(`[data-circle="${i}"]`).classList.add(`noDisplay`);
+            }
             else{
-                circs[i].classList.remove(`noDisplay`);
                 let p = v.runs[v.selected].auto[`t${i}`] / autoBuyTime( v.runs[v.selected].span, i );
                 let circle = document.querySelector(`[data-circle="${i}"]`);
+                circle.classList.remove(`noDisplay`);
                 let radius = circle.r.baseVal.value;
                 let circumference = radius * 2 * Math.PI;
                 circle.style.strokeDasharray = `${circumference} ${circumference}`;
@@ -1087,9 +1088,9 @@ TODO
 Run progress bar in side menu
 More Complex Quests
 Deduplicate and sort Jerk Traits
-Make marqueee CSS based and spawn properly
 Fastest Quantum Lap does something?
 Prestige
+Tooltip invisible when jerk selected...
 
 
 Uncertainty     None
