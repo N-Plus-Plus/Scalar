@@ -236,8 +236,9 @@ function complete( index, auto ){
     topUpZeros();
     spawnCheck();
     if( !auto ){ display( 0 ); }
-    else if( index == v.selected ){ display( 0 ); display( 0 ); }
+    else if( index == v.selected ){ display( 0 ); }
     else if( v.selected >= index ){ v.selected = parseInt( v.selected ) - 1; }
+    selectTab( v.tab, v.miniTab );
     displayRuns();
     displayWings();
     saveState();
@@ -261,9 +262,11 @@ function spawnCheck(){
         let nxt = nextDef( r );
         let target = getTarget( nxt );
         if( v.completed[r] >= target ){
-            v.completed[r] -= target;
-            v.runs.push( new Run( nxt ) );
-            updateCPS( v.runs.length - 1 );
+            if( v.runs.filter( e => e.span == nxt ).length < global.tierLimit ){
+                v.completed[r] -= target;
+                v.runs.push( new Run( nxt ) );
+                updateCPS( v.runs.length - 1 );
+            }
         }
     }
 }
@@ -680,11 +683,11 @@ function buyUpgrade( d, type, tier ){
             if( type == `scaleDelay` ){ display( v.selected ); }
             if( type == `autoBuy` ){ updateAutoValues(); }
         }
+        spawnCheck();
         display( v.selected );
         displayRewards();
         if( d == null ){ d = `points`; }
         selectTab( v.tab );
-        // buildTabContents( d );
     }
 }
 
@@ -868,6 +871,7 @@ const global = {
     , scrollSpeed: 3
     , recreateCost: 5
     , recreateImproves: 0.8
+    , tierLimit: 9
 }
 
 const upgrades = [
@@ -1110,6 +1114,8 @@ Prestige
 Tooltip invisible when jerk selected...
 Don't glow the recreator when you can't afford to use it (maybe don't even display it?)
 complete() not updating points buttons
+
+Build-up of runs beyond an invisible limit
 
 Uncertainty     None
 Particles       Higgs Boson
