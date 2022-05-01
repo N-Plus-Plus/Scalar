@@ -757,7 +757,7 @@ function recruitJerk(){
 }
 
 function recreateJerk( j ){
-    let c = global.recreateCost + v.recreates;
+    let c = global.recreateCost;// + v.recreates;
     if( v.curr.gained - v.curr.spent >= c ){
         v.curr.spent += c;
         v.recreates++;
@@ -848,7 +848,7 @@ var v = {
     , tab: null
     , miniTab: null
     , clickTimer: 10000
-    , spawnChance: 1 / 10000
+    , spawnChance: 1 / 5000
     , watermark: 0    
     , multi: 0
     , recreates: 0
@@ -867,6 +867,7 @@ const global = {
     , minRoster: 1
     , scrollSpeed: 3
     , recreateCost: 5
+    , recreateImproves: 0.8
 }
 
 const upgrades = [
@@ -978,23 +979,38 @@ class Run{
 
 class Jerk{
     constructor( id ){
+        let o = 0;
         this.id = String.fromCharCode( 945 + v.roster.length );
-        if( id !== undefined ){ this.id = id; }
+        let str = null;
+        if( id !== undefined ){
+            this.id = id;
+            if( Math.random() < global.recreateImproves ){ str = true; }
+            else{ str = false; }
+            o = v.roster.filter( e => e.id == id )[0].strength;
+        }
         this.traitCount = traitCount();
-        this.trait = [];
+        let genTrait = generateTraits( this.traitCount, str, o );
+        this.trait = genTrait.trait;
+        this.strength = genTrait.strength;
+        this.assignment = null;
+    }
+}
+
+function generateTraits( count, str, old ){
+    while( true ){
         let strength = 0;
-        for( let i = 0; i < this.traitCount; i++ ){
+        let tr = [];
+        for( let i = 0; i < count; i++ ){
             let selection = shuffle(jerkTraits)[0];
             let nonce = shuffle( chance )[0];
             let amt = nonce * selection.significance;
             let t = Math.floor( Math.random() * stat.length );
-            this.trait.push( 
-                { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(0) ).replace( `@`, gen[t] )
-                } );
+            tr.push( { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(0) ).replace( `@`, gen[t] ) } );
             strength += Math.ceil( nonce );
-        }        
-        this.strength = strength / this.traitCount;
-        this.assignment = null;
+        }
+        if( str == null ){ return { strength: strength, trait: tr }; }
+        else if( str == true && strength > old ){ return { strength: strength, trait: tr }; }
+        else if( str == false && strength < old ){ return { strength: strength, trait: tr }; }
     }
 }
 
@@ -1090,8 +1106,10 @@ More Complex Quests
 Deduplicate and sort Jerk Traits
 Fastest Quantum Lap does something?
 Prestige
-Tooltip invisible when jerk selected...
 
+Tooltip invisible when jerk selected...
+Don't glow the recreator when you can't afford to use it (maybe don't even display it?)
+complete() not updating points buttons
 
 Uncertainty     None
 Particles       Higgs Boson
