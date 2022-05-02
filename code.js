@@ -152,12 +152,12 @@ function displayComplete(){
     document.querySelector(`.completeBox`).classList.remove(`noDisplay`);
 }
 
-function buy( index, g, auto ){ // add bulk
-    if( afford( index, g ) ){
-        v.runs[index].curr.spent += cost( index, g );
-        v.runs[index].gen[g]++;
-        updateCPS( index );
-        if( auto && index !== v.selected ){}
+function buy( ii, g, auto ){ // add bulk
+    if( afford( ii, g ) ){
+        v.runs[ii].curr.spent += cost( ii, g );
+        v.runs[ii].gen[g]++;
+        updateCPS( ii );
+        if( auto && ii !== v.selected ){}
         else{ display( v.selected ); }
         saveState();
     }
@@ -231,15 +231,15 @@ function complete( ind, auto ){
     let d = v.runs[ind].span;
     if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = 0; }
     v.reward[span[d].curr] += calcReward( ind );
-    buildTabContents( v.tab, v.miniTab );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
     v.curr.gained++;
-    displayRewards();
     v.runs.splice(ind,1);
-    if( !auto ){ display( 0 ); }
-    else if( ind == v.selected ){ display( 0 ); }
-    else if( v.selected >= ind ){ display( parseInt( v.selected ) - 1 ); }
+    displayRewards();
+    if( !auto ){ v.selected = 0; }
+    else if( ind == v.selected ){ v.selected = 0; }
+    else if( v.selected >= ind ){ v.selected = parseInt( v.selected ) - 1; }
+    display( v.selected );
     topUpZeros();
     spawnCheck();
     selectTab( v.tab, v.miniTab );
@@ -678,8 +678,8 @@ function buyUpgrade( d, type, tier ){
             if( type == `recruitJerk` ){ recruitJerk(); }
         }
         else if( tier == null ){
-            v.upgrades[d][type]++;
             if( type == `rebirthSpan` ){ rebirth( d ); }
+            else{ v.upgrades[d][type]++; }
         }
         else{
             v.upgrades[d][type][tier]++;
@@ -790,7 +790,6 @@ function rebirth( s ){
     delete v.upgrades[s];
     buildUpgrades();
     v.upgrades[s].rebirthSpan = parseInt( n ) + 1;
-    console.log( n, v.upgrades[s].rebirthSpan )
     display( v.selected );
     selectTab( v.tab, v.miniTab );
     saveState();
