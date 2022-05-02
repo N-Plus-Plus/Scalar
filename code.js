@@ -226,22 +226,22 @@ function calcReward( index ){
     return Math.floor( Math.log10( balance( index ) ) );
 }
 
-function complete( index, auto ){
-    if( !v.runs[index].quest.complete ){ return; }
-    let d = v.runs[index].span;
+function complete( ind, auto ){
+    if( !v.runs[ind].quest.complete ){ return; }
+    let d = v.runs[ind].span;
     if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = 0; }
-    v.reward[span[d].curr] += calcReward( index );
+    v.reward[span[d].curr] += calcReward( ind );
     buildTabContents( v.tab, v.miniTab );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
     v.curr.gained++;
     displayRewards();
-    v.runs.splice(index,1);
+    v.runs.splice(ind,1);
+    if( !auto ){ display( 0 ); }
+    else if( ind == v.selected ){ display( 0 ); }
+    else if( v.selected >= ind ){ display( parseInt( v.selected ) - 1 ); }
     topUpZeros();
     spawnCheck();
-    if( !auto ){ display( 0 ); }
-    else if( index == v.selected ){ display( 0 ); }
-    else if( v.selected >= index ){ v.selected = parseInt( v.selected ) - 1; }
     selectTab( v.tab, v.miniTab );
     displayRuns();
     displayWings();
@@ -291,10 +291,10 @@ function clickReward( type, t ){
 }
 
 function display( index ){
+    v.selected = index;
     let t = document.querySelector(`#selected`);
     t.innerHTML = ``;
-    t.appendChild( buildContents( index ) );
-    v.selected = index;
+    t.appendChild( buildContents( v.selected ) );
     forgeRings();
     ringPauseDisplay();
     displayRuns();
@@ -302,7 +302,7 @@ function display( index ){
     showStats();
     document.documentElement.style.setProperty('--span', span[v.runs[index].span].color );
     updateCompleting();
-    updateButtons();
+    updateButtons();    
 }
 
 function displayRewards(){
