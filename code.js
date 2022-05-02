@@ -890,7 +890,7 @@ const global = {
 
 const upgrades = [
     {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
-    , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 5%` } // consider making Span rather than Global
+    , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 10%` } // consider making Span rather than Global
     , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
     , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
     , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
@@ -950,16 +950,16 @@ class Quest{
         let w = Object.keys( span ).findIndex( (e) => e == d );
         if( q.basis == `buy1Gen` ){
             let n = Math.floor( Math.random() * q.target.length );
-            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.05, v.upgrades.questTarget ) );
+            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.1, v.upgrades.questTarget ) );
             this.tier = q.target[n].t;
         }
         else if( q.basis == `buyNGen` ){
             let n = Math.floor( Math.random() * q.target.length );
-            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.05, v.upgrades.questTarget ) );
+            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.1, v.upgrades.questTarget ) );
             this.tier = q.target[n].t;            
         }
         else{
-            this.target = Math.floor( q.target * Math.pow( global.scale.span, w ) ) / Math.pow( 1.05, v.upgrades.questTarget );
+            this.target = Math.floor( q.target * Math.pow( global.scale.span, w ) ) / Math.pow( 1.1, v.upgrades.questTarget );
         }
         this.basis = q.basis;
         this.progress = 0;
