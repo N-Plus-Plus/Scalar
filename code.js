@@ -51,7 +51,7 @@ function pressed(e){
 }
 
 function doLoop( tick ){
-    let delta = ( tick - v.ms.last ) * global.godMode * Math.pow( 10, v.multi );
+    let delta = ( tick - v.ms.last ) * global.godMode;
     earn( delta );
     progress();
     showStats();
@@ -219,7 +219,7 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `moreOutput` && i == tr[a].t ){ o *= ( 1 + tr[a].amt ) }
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
-    return o;
+    return o * Math.pow( 10, v.multi ) * Math.pow( 10, v.upgrades[v.runs[index].span].rebirthSpan );
 }
 
 function calcReward( index ){
@@ -393,7 +393,7 @@ function buildTabContents( n, x ){
     let t = document.querySelector(`[data-upgrades]`);
     t.innerHTML = ``;
     if( n == `points` ){
-        t.appendChild( elem( `upgradeHeading spanLabel`, `Global Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="threeQuartCell">Cost</div></div>` ) );
+        t.appendChild( elem( `upgradeHeading spanLabel`, `Global Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
         for( k in Object.keys( v.upgrades ) ){
             let ch = Object.keys(v.upgrades)[k];
             let subj = upgrades.filter( (e) => e.id == ch )[0];
@@ -404,12 +404,12 @@ function buildTabContents( n, x ){
                     if( upgradeAfford( null, subj.id, null ) ){ r.lastChild.classList.add(`affordable`); }
                     r.appendChild( elem( `label bigCell`, subj.nice ) );
                     r.appendChild( elem( `stat halfCell`, v.upgrades[ch] ) );
-                    r.appendChild( elem( `stat threeQuartCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
+                    r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
                     t.appendChild(r);
                 }
             }
         }
-        t.appendChild( elem( `upgradeHeading spanLabel`, `Cosmic Forces` ) ); //<div class="smaller">${numDisplay( v.roster.length)}</div>
+        t.appendChild( elem( `upgradeHeading spanLabel`, `Cosmic Forces` ) );
         t.appendChild( elem( `smallSpanLabel`, `Force Assignments` ) );
         t.appendChild( buildAssignBox() );
         t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
@@ -679,12 +679,11 @@ function buyUpgrade( d, type, tier ){
         }
         else if( tier == null ){
             v.upgrades[d][type]++;
-            if( type == `creepReduce` ){ display( v.selected ); }
+            if( type == `rebirthSpan` ){ rebirth( d ); }
         }
         else{
             v.upgrades[d][type][tier]++;
             buildMiniTabContents( tier, d );
-            if( type == `scaleDelay` ){ display( v.selected ); }
             if( type == `autoBuy` ){ updateAutoValues(); }
         }
         spawnCheck();
@@ -786,10 +785,19 @@ function nextDef( d ){
     return arr[index];
 }
 
+function rebirth( s ){
+    let n = JSON.stringify( JSON.parse( v.upgrades[s].rebirthSpan ) );
+    delete v.upgrades[s];
+    buildUpgrades();
+    v.upgrades[s].rebirthSpan = parseInt( n ) + 1;
+    console.log( n, v.upgrades[s].rebirthSpan )
+    display( v.selected );
+    selectTab( v.tab, v.miniTab );
+    saveState();
+}
+
 function adjustQuestTargets(){
-    for( r in v.runs ){
-        v.runs[r].quest.target /= 1.05;
-    }
+    for( r in v.runs ){ v.runs[r].quest.target /= 1.05; }
     display( v.selected );
 }
 
@@ -812,6 +820,7 @@ function autoBuyTime( d, t ){
 
 function saveState(){
     localStorage.setItem( `v` , JSON.stringify( v ) );
+    localStorage.setItem( `multi` , JSON.stringify( v.multi ) );
 }
 
 function loadState(){
@@ -862,7 +871,7 @@ var v = {
 }
 
 const global = {
-    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5, headStart: 1.25 } // 1.05361025 to reach 250k
+    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5, headStart: 1.25 }
     , tickSpeed: 50
     , spanTarget: 5
     , zeros: 1
@@ -879,20 +888,20 @@ const global = {
 }
 
 const upgrades = [
-    {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       math: `add`,        nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
-    , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       math: `multiply`,   nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 5%` } // consider making Span rather than Global
-    , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     math: `multiply`,   nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
-    , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     math: `add`,        nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
-    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     math: `add`,        nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
-    , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     math: `multiply`,   nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
-    , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       math: `divide`,     nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 10%` } //
-    , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     math: `subtract`,   nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
-    , { id: `autoBuy`,      scope: `tier`,      cost: 5,    benefit: 1.1,   multi: 1.125,   math: `divide`,     nice: `Auto Buyer`,         tooltip: `Enable / Spped up auto-buying by 10%` } //
-    , { id: `scaleDelay`,   scope: `tier`,      cost: 5,    benefit: 1,     multi: 1.5,     math: `add`,        nice: `Scale Delay`,        tooltip: `Delay the start of cost scaling by 1 (more)` } //
-    , { id: `creepReduce`,  scope: `tier`,      cost: 10,   benefit: 1.05,  multi: 2.5,     math: `divide`,     nice: `Cost Scaling`,       tooltip: `Reduce the amount by which costs scale by 5%` } //
-    , { id: `bulkBonus`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       math: `multiply`,   nice: `Bulk Bonus`,         tooltip: `Increase output by 0.5% × total owned` } // power of a power - be careful with scaling
-    , { id: `headStart`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       math: `multiply`,   nice: `Head Start`,         tooltip: `Start with 1 (more) Generator of this Tier owned` }
-    // clickMe tilting
+    {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
+    , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 5%` } // consider making Span rather than Global
+    , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
+    , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
+    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
+    , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
+    , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 10%` } //
+    , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
+    , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 10× Income boost` } //
+    , { id: `autoBuy`,      scope: `tier`,      cost: 5,    benefit: 1.1,   multi: 1.125,   nice: `Auto Buyer`,         tooltip: `Enable / Spped up auto-buying by 10%` } //
+    , { id: `scaleDelay`,   scope: `tier`,      cost: 5,    benefit: 1,     multi: 1.5,     nice: `Scale Delay`,        tooltip: `Delay the start of cost scaling by 1 (more)` } //
+    , { id: `creepReduce`,  scope: `tier`,      cost: 10,   benefit: 1.05,  multi: 2.5,     nice: `Cost Scaling`,       tooltip: `Reduce the amount by which costs scale by 5%` } //
+    , { id: `bulkBonus`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       nice: `Bulk Bonus`,         tooltip: `Increase output by 0.5% × total owned` } //
+    , { id: `headStart`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       nice: `Head Start`,         tooltip: `Start with 1 (more) Generator of this Tier owned` } //
 ]
 
 const stat = [ { cost: 10, adds: 1 } ]
@@ -918,7 +927,6 @@ const questDef = [
     , { basis: `own`,       target: 250, verbiage: `Own N ! Generators` }
     , { basis: `buy1Gen`,   target: [{a:70,t:0},{a:65,t:1},{a:60,t:2},{a:55,t:3},{a:50,t:4},{a:45,t:5},{a:40,t:6},{a:30,t:7},{a:20,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators`}
     , { basis: `buyNGen`,   target: [{a:55,t:1},{a:50,t:2},{a:45,t:3},{a:40,t:4},{a:35,t:5},{a:30,t:6},{a:25,t:7},{a:15,t:8},{a:5,t:9}], verbiage: `Buy N Tier I to $ Generators`}
-    // spend 500 Thousand Q in a single purchase
 ]
 
 const gen = [`Tier I`,`Tier II`,`Tier III`,`Tier IV`,`Tier V`,`Tier VI`,`Tier VII`,`Tier VIII`,`Tier IX`,`Tier X`];
@@ -933,8 +941,6 @@ const jerkTraits = [
     , { id: `moreOutput`, significance: 0.1, scope: `tier`, verbiage: `#% more output from @` }
     , { id: `lessScale`, significance: 0.05, scope: `tier`, verbiage: `#% slower cost scaling on @` }
     , { id: `flatDiscount`, significance: 0.05, scope: `tier`, verbiage: `#% discount on @ cost` }
-    // , { id: `boughtBoost`, significance: 1, scope: `tier` }  // move to span tier upgrade
-    // , { id: `delayScale`, significance: 1, scope: `tier` }
 ]
 
 class Quest{

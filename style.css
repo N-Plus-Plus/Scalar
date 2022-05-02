@@ -48,9 +48,8 @@ footer{ position: absolute; bottom: 0; left: 0; height: 3rem; width: 100%; z-ind
 .stat{ font-family: var(--numeric); font-weight: 800;}
 .tableHeadings,.tableRow{ display: flex; height: 2rem; margin: 0 0 1rem 0; }
 .heading,.cell{ width: 6rem; display: flex; align-items: center; justify-content: center;}
-.bigCell{ width: 10rem; height: 2.25rem; display: flex; align-items: center; justify-content: flex-start; padding-left: 1rem;}
-.halfCell{ width: 4rem; display: flex; align-items: center; justify-content: center;}
-.threeQuartCell{ width: 6rem; display: flex; align-items: center; justify-content: center;}
+.bigCell{ width: 12rem; height: 2.25rem; display: flex; align-items: center; justify-content: flex-start; padding-left: 1rem;}
+.halfCell{ width: 4rem; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;}
 .heading.long,.cell.long{ width: 7.5rem; }
 .main{ min-width: 30rem; background-color: #0006; }
 .button{ justify-content: center; background-color: var(--invis); height: 2rem; width: 7.5rem; border: solid 1px white; color: var(--lgrey)}
