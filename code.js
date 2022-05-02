@@ -140,7 +140,7 @@ function progress(){
 
 function getAutoCompleteTime( r ){
     let raw = global.autoComplete * ( 1000 / global.tickSpeed );
-    return Math.ceil( raw * Math.pow( 1 / 1.1, v.upgrades[v.runs[r].span].autoComplete - 1 ) )
+    return Math.ceil( raw * Math.pow( 1 / 1.2, v.upgrades[v.runs[r].span].autoComplete - 1 ) )
 }
 
 function displayProgress(){
@@ -806,7 +806,7 @@ function calcZeros(){
 
 function autoBuyTime( d, t ){
     let o = global.autoBuy + global.autoBuy * ( t + 1 ) / 2;
-    o *= Math.pow( 1 / 1.05, v.upgrades[d].autoBuy[t] );
+    o *= Math.pow( 1 / 1.1, v.upgrades[d].autoBuy[t] );
     let tr = getTraits( d );
     for( a in tr ){
         if( tr[a].id == `fastBuy` ){ o *= ( 1 - tr[a].amt ) }
@@ -842,6 +842,7 @@ function dataFix(){
     delete v.upgrades.rosterSize;
     if( v.recreates == undefined ){ v.recreates = 0; }
     if( v.removedDoubleCount == undefined ){ v.upgrades[`0`].rebirthSpan--; v.removedDoubleCount = true; }
+    v.spawnChance = 1 / 5e3;
 }
 
 function resetData(){
@@ -894,7 +895,7 @@ const upgrades = [
     , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
     , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
-    , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 10%` } //
+    , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 20%` } //
     , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
     , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 10× Income boost` } //
     , { id: `autoBuy`,      scope: `tier`,      cost: 5,    benefit: 1.1,   multi: 1.125,   nice: `Auto Buyer`,         tooltip: `Enable / Spped up auto-buying by 10%` } //
