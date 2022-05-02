@@ -140,7 +140,7 @@ function progress(){
 
 function getAutoCompleteTime( r ){
     let raw = global.autoComplete * ( 1000 / global.tickSpeed );
-    return Math.ceil( raw * Math.pow( 1 / 1.2, v.upgrades[v.runs[r].span].autoComplete - 1 ) )
+    return Math.ceil( raw * Math.pow( 0.8, v.upgrades[v.runs[r].span].autoComplete - 1 ) )
 }
 
 function displayProgress(){
@@ -624,7 +624,7 @@ function offsetRings(){
 
 function updateCompleting(){
     let n = v.runs[v.selected].completeIn;
-    let d = Math.ceil( global.autoComplete * ( 1000 / global.tickSpeed ) * Math.pow( 1 / 1.1, v.upgrades[v.runs[v.selected].span].autoComplete - 1 ) );
+    let d = getAutoCompleteTime( v.selected );
     document.querySelector(`.completing`).style = `width: ${( 1 - ( n / d ) ) * 100}%`;
 }
 
