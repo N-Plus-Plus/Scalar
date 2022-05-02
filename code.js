@@ -841,6 +841,7 @@ function loadState(){
 function dataFix(){
     delete v.upgrades.rosterSize;
     if( v.recreates == undefined ){ v.recreates = 0; }
+    if( v.removedDoubleCount == undefined ){ v.upgrades[`0`].rebirthSpan--; v.removedDoubleCount = true; }
 }
 
 function resetData(){
