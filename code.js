@@ -238,7 +238,7 @@ function complete( ind, auto ){
     displayRewards();
     if( !auto ){ v.selected = 0; }
     else if( ind == v.selected ){ v.selected = 0; }
-    else if( v.selected >= ind ){ v.selected = parseInt( v.selected ) - 1; }
+    else if( v.selected >= ind ){ v.selected--; }
     display( v.selected );
     topUpZeros();
     spawnCheck();
@@ -291,7 +291,7 @@ function clickReward( type, t ){
 }
 
 function display( index ){
-    v.selected = index;
+    v.selected = parseInt( index );
     let t = document.querySelector(`#selected`);
     t.innerHTML = ``;
     t.appendChild( buildContents( v.selected ) );
