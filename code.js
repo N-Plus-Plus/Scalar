@@ -112,8 +112,7 @@ function progress(){
             if( v.runs[r].quest.progress == 1 ){
                 v.runs[r].quest.complete = true;
                 if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
-                    let raw = global.autoComplete * ( 1000 / global.tickSpeed );
-                    v.runs[r].completeIn = Math.ceil( raw * Math.pow( 1 / 1.1, v.upgrades[v.runs[r].span].autoComplete - 1 ) );
+                    v.runs[r].completeIn = getAutoCompleteTime( r );
                 }
             }
         }
@@ -137,6 +136,11 @@ function progress(){
     }
     offsetRings();
     displayProgress();
+}
+
+function getAutoCompleteTime( r ){
+    let raw = global.autoComplete * ( 1000 / global.tickSpeed );
+    return Math.ceil( raw * Math.pow( 1 / 1.1, v.upgrades[v.runs[r].span].autoComplete - 1 ) )
 }
 
 function displayProgress(){
@@ -1001,6 +1005,7 @@ class Jerk{
 }
 
 function generateTraits( count, str, old ){
+    let brake = 0;
     while( true ){
         let strength = 0;
         let tr = [];
@@ -1012,9 +1017,11 @@ function generateTraits( count, str, old ){
             tr.push( { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(0) ).replace( `@`, gen[t] ) } );
             strength += Math.ceil( nonce );
         }
-        if( str == null ){ return { strength: strength, trait: tr }; }
-        else if( str == true && strength > old ){ return { strength: strength, trait: tr }; }
-        else if( str == false && strength < old ){ return { strength: strength, trait: tr }; }
+        brake++;
+        if( brake > 75 ){ return { strength: strength, trait: tr }; break; }
+        else if( str == null ){ return { strength: strength, trait: tr }; break; }
+        else if( str == true && strength > old ){ return { strength: strength, trait: tr }; break; }
+        else if( str == false && strength < old ){ return { strength: strength, trait: tr }; break; }
     }
 }
 
@@ -1096,9 +1103,10 @@ const helpful = [
     , `You gain one <div class="inlineIcon points"></div> for every completion`
     , `Assign a Cosmic Force to gain its benefit`
 
-
-    , `These messages may be better scrolling in the other direction`
     , `59 6F 75 20 77 65 6E 74 20 74 6F 20 61 20 6C 6F 74 20 6F 66 20 74 72 6F 75 62 6C 65 20 74 6F 20 72 65 61 64 20 74 68 69 73 2E 2E 2E`
+    , `Is this all building towards something?`
+    , `Surely there's going to be a Prestige at some point...`
+    , `Is this game suggesting that Particles just appear given enough Uncertainty?`
     , `Humorous messages will appear here... focussing on features at the sec`
 ]
 
@@ -1113,9 +1121,7 @@ Prestige
 
 Tooltip invisible when jerk selected...
 Don't glow the recreator when you can't afford to use it (maybe don't even display it?)
-complete() not updating points buttons
-
-Build-up of runs beyond an invisible limit
+?? complete() not updating points buttons
 
 Uncertainty     None
 Particles       Higgs Boson
