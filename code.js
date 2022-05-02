@@ -796,7 +796,7 @@ function rebirth( s ){
 }
 
 function adjustQuestTargets(){
-    for( r in v.runs ){ v.runs[r].quest.target /= 1.05; }
+    for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / 1.1 ); }
     display( v.selected );
 }
 
