@@ -152,7 +152,8 @@ function displayComplete(){
     document.querySelector(`.completeBox`).classList.remove(`noDisplay`);
 }
 
-function buy( ii, g, auto ){ // add bulk
+function buy( ii, g, auto ){
+    ii = parseInt( ii );
     if( afford( ii, g ) ){
         v.runs[ii].curr.spent += cost( ii, g );
         v.runs[ii].gen[g]++;
@@ -965,6 +966,7 @@ class Quest{
         this.progress = 0;
         this.complete = false;
         this.verbiage = q.verbiage;
+        this.commence = now();
     }
 }
 
