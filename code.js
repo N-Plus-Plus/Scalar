@@ -519,7 +519,6 @@ function buildTooltips(){
 function displayRuns(){
     let t = document.querySelector(`#runs`);
     t.innerHTML = ``;
-    // for( let i = 0; i <= v.watermark + 1; i++ ){
     for( let i = v.watermark + 1; i >= 0; i-- ){
         let k = Object.keys(span)[i];
         let e = elem( `spanBox` );
@@ -918,9 +917,9 @@ const global = {
 const upgrades = [
     {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
     , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 10%` } // consider making Span rather than Global
-    , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 1.5,     nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
+    , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 2,       nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
     , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
-    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.2,     nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
+    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.75,    nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
     , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 20%` } //
     , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
@@ -962,13 +961,13 @@ const gg = [`I`,`II`,`III`,`IV`,`V`,`VI`,`VII`,`VIII`,`IX`,`X`];
 const chance = [1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,7,7,7,7,8,8,8,9,9,10];
 
 const jerkTraits = [
-    { id: `fastBuy`, significance: 0.05, scope: `tier`, verbiage: `#% faster @ auto-buy` }
-    , { id: `fastOverall`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% faster auto-buy` }
-    , { id: `overallDiscount`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% discount on cost` }
-    , { id: `overallOutput`, significance: 0.05, scope: `span`, verbiage: `All Tiers #% more output` }
-    , { id: `moreOutput`, significance: 0.1, scope: `tier`, verbiage: `#% more output from @` }
-    , { id: `lessScale`, significance: 0.05, scope: `tier`, verbiage: `#% slower cost scaling on @` }
-    , { id: `flatDiscount`, significance: 0.05, scope: `tier`, verbiage: `#% discount on @ cost` }
+      { id: `fastOverall`,      significance: 0.05,  scope: `span`, verbiage: `All Tiers #% faster auto-buy` }
+    , { id: `overallDiscount`,  significance: 0.05,  scope: `span`, verbiage: `All Tiers #% discount on cost` }
+    , { id: `overallOutput`,    significance: 0.05,  scope: `span`, verbiage: `All Tiers #% more output` }
+    , { id: `fastBuy`,          significance: 0.075, scope: `tier`, verbiage: `#% faster @ auto-buy` }
+    , { id: `moreOutput`,       significance: 0.125, scope: `tier`, verbiage: `#% more output from @` }
+    , { id: `lessScale`,        significance: 0.075, scope: `tier`, verbiage: `#% slower cost scaling on @` }
+    , { id: `flatDiscount`,     significance: 0.075, scope: `tier`, verbiage: `#% discount on @ cost` }
 ]
 
 class Quest{
@@ -1049,7 +1048,7 @@ function generateTraits( count, str, old ){
             let nonce = shuffle( chance )[0];
             let amt = nonce * selection.significance;
             let t = Math.floor( Math.random() * stat.length );
-            tr.push( { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(0) ).replace( `@`, gen[t] ) } );
+            tr.push( { id: selection.id, amt: amt, t: t, verbiage: selection.verbiage.replace( `#`, ( amt * 100 ).toFixed(1) ).replace( `@`, gen[t] ) } );
             strength += Math.ceil( nonce );
         }
         brake++;
@@ -1161,6 +1160,7 @@ Fastest Quantum Lap does something?
 Prestige
 
 When adding AutoComplete, need to sweep and commence those runs
+Jerk trait - trickle income
 
 Tooltip invisible when jerk selected...
 Don't glow the recreator when you can't afford to use it (maybe don't even display it?)

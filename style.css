@@ -78,7 +78,7 @@ footer{ position: absolute; bottom: 0; left: 0; height: 3rem; width: 100%; z-ind
 .curr{ width: 2rem; height: 2rem; margin: 0 1rem 0 0;}
 .tabBox{ display: Flex; border-bottom: solid black; }
 .tabIco{ width: 1.25rem; height: 1.25rem; pointer-events: none;}
-.tab{ width: 2.5rem; height: 2.5rem; border-radius: 20% 20% 0 0; background-color: #0006; display: flex; justify-content: center; align-items: center; opacity: 0.5; transition: all 0.5s; cursor: pointer;  }
+.tab{ width: 2.25rem; height: 2.25rem; border-radius: 20% 20% 0 0; background-color: #0006; display: flex; justify-content: center; align-items: center; opacity: 0.5; transition: all 0.5s; cursor: pointer;  }
 .tab:hover,.miniTab:hover{ opacity: 1;}
 .miniTabBox{ display: Flex; border-bottom: solid black; margin-top: 1.5rem; }
 .tab.active,.miniTab.active{ background-color: #000; opacity: 1; }
