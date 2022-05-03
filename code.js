@@ -221,7 +221,7 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `moreOutput` && i == tr[a].t ){ o *= ( 1 + tr[a].amt ) }
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
-    return o * Math.pow( 10, v.multi ) * Math.pow( 10, v.upgrades[v.runs[index].span].rebirthSpan );
+    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan );
 }
 
 function calcReward( index ){
@@ -901,7 +901,7 @@ const upgrades = [
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
     , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 20%` } //
     , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
-    , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 10× Income boost and 25% faster automation` } //
+    , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 5× Income boost and 25% faster automation` } //
     , { id: `autoBuy`,      scope: `tier`,      cost: 5,    benefit: 1.1,   multi: 1.125,   nice: `Auto Buyer`,         tooltip: `Enable / Spped up auto-buying by 10%` } //
     , { id: `scaleDelay`,   scope: `tier`,      cost: 5,    benefit: 1,     multi: 1.5,     nice: `Scale Delay`,        tooltip: `Delay the start of cost scaling by 1 (more)` } //
     , { id: `creepReduce`,  scope: `tier`,      cost: 10,   benefit: 1.05,  multi: 2.5,     nice: `Cost Scaling`,       tooltip: `Reduce the amount by which costs scale by 5%` } //
