@@ -140,7 +140,8 @@ function progress(){
 
 function getAutoCompleteTime( r ){
     let raw = global.autoComplete * ( 1000 / global.tickSpeed );
-    return Math.ceil( raw * Math.pow( 0.8, v.upgrades[v.runs[r].span].autoComplete - 1 ) )
+    let s = v.runs[r].span;
+    return Math.ceil( raw * Math.pow( 0.8, v.upgrades[s].autoComplete - 1 ) ) * Math.pow( 0.75, v.upgrades[s].rebirthSpan );
 }
 
 function displayProgress(){
@@ -229,7 +230,7 @@ function calcReward( index ){
 
 function complete( ind, auto ){
     if( !v.runs[ind].quest.complete ){ return; }
-    let d = v.runs[ind].span;
+    let d = parseFloat( JSON.parse( JSON.stringify( v.runs[ind].span ) ) );
     if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = 0; }
     v.reward[span[d].curr] += calcReward( ind );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
@@ -237,8 +238,9 @@ function complete( ind, auto ){
     v.curr.gained++;
     v.runs.splice(ind,1);
     displayRewards();
-    if( !auto ){ v.selected = 0; }
-    else if( ind == v.selected ){ v.selected = 0; }
+    let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
+    if( !auto ){ v.selected = nextSelection; }
+    else if( ind == v.selected ){ v.selected = nextSelection; }
     else if( v.selected >= ind ){ v.selected--; }
     display( v.selected );
     topUpZeros();
@@ -814,6 +816,7 @@ function autoBuyTime( d, t ){
         if( tr[a].id == `fastOverall` ){ o *= ( 1 - tr[a].amt ) }
     }
     o *= ( 1000 / global.tickSpeed );
+    o *= Math.pow( 0.75, v.upgrades[d].rebirthSpan );
     o = Math.ceil( o );
     return o;
 }
@@ -898,7 +901,7 @@ const upgrades = [
     , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
     , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 20%` } //
     , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
-    , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 10× Income boost` } //
+    , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 10× Income boost and 25% faster automation` } //
     , { id: `autoBuy`,      scope: `tier`,      cost: 5,    benefit: 1.1,   multi: 1.125,   nice: `Auto Buyer`,         tooltip: `Enable / Spped up auto-buying by 10%` } //
     , { id: `scaleDelay`,   scope: `tier`,      cost: 5,    benefit: 1,     multi: 1.5,     nice: `Scale Delay`,        tooltip: `Delay the start of cost scaling by 1 (more)` } //
     , { id: `creepReduce`,  scope: `tier`,      cost: 10,   benefit: 1.05,  multi: 2.5,     nice: `Cost Scaling`,       tooltip: `Reduce the amount by which costs scale by 5%` } //
