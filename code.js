@@ -842,6 +842,28 @@ function loadState(){
     setIco( v.watermark );
 }
 
+function exportState(){
+    // let state = localStorage.getItem(`v`);
+    download( localStorage.getItem(`v`) );
+}
+
+function importState( state ){
+    v = JSON.parse( state );
+    saveState();
+    location.reload();
+}
+
+function download(state) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(state));
+    // element.setAttribute('href', 'data:text/plain;charset=utf-8,' + state);
+    element.setAttribute('download', now() + `.txt`);  
+    element.style.display = 'none';
+    document.body.appendChild(element);  
+    element.click();  
+    document.body.removeChild(element);
+  }
+
 function dataFix(){
     delete v.upgrades.rosterSize;
     if( v.recreates == undefined ){ v.recreates = 0; }
