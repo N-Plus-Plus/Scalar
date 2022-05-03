@@ -519,11 +519,12 @@ function buildTooltips(){
 function displayRuns(){
     let t = document.querySelector(`#runs`);
     t.innerHTML = ``;
-    for( let i = 0; i <= v.watermark + 1; i++ ){
+    // for( let i = 0; i <= v.watermark + 1; i++ ){
+    for( let i = v.watermark + 1; i >= 0; i-- ){
         let k = Object.keys(span)[i];
         let e = elem( `spanBox` );
             if( i == 0 ){ e.appendChild( elem( `spanLabel`, span[i].label + `<div class="smaller">Max: ${numDisplay( calcZeros() )}</div>` ) ); }
-            else{ e.appendChild( elem( `spanLabel`, span[i].label + `<div class="smaller">${completeBalance( Object.keys(span)[i-1] )} / ${getTarget( k )}</div>` ) ); }
+            else{ e.appendChild( elem( `spanLabel`, span[i].label + `<div class="smaller">${numDisplay( completeBalance( Object.keys(span)[i-1] ) )} / ${getTarget( k )}</div>` ) ); }
             e.appendChild( elem( `spanSubBox`, ``, [[`selector`,k]] ) );
             t.appendChild( e );
     }
@@ -942,7 +943,7 @@ const span = [
     , { curr: `Cells`,          label: `Cellular`,      color: `#2a3964` }
     , { curr: `Organisms`,      label: `Organic`,       color: `#2c5478` }
     , { curr: `Ideas`,          label: `Thought`,       color: `#3d6b68` }
-    , { curr: `Code`,           label: `</>`,           color: `#385e35` }
+    , { curr: `&lt;&#47;&#62;`, label: `Code`,          color: `#385e35` }
     , { curr: `Features`,       label: `Scalar`,        color: `#6f8240` }
 ]
 
@@ -1144,6 +1145,12 @@ const helpful = [
     , `Humorous messages will appear here... focussing on features at the sec`
 ]
 
+function addTestData(){
+    for( let i = 0; i < 9; i++ ){
+        v.runs.push( new Run( i ) );
+    }
+}
+
 /*
 
 TODO
@@ -1152,6 +1159,8 @@ More Complex Quests
 Deduplicate and sort Jerk Traits
 Fastest Quantum Lap does something?
 Prestige
+
+When adding AutoComplete, need to sweep and commence those runs
 
 Tooltip invisible when jerk selected...
 Don't glow the recreator when you can't afford to use it (maybe don't even display it?)
