@@ -161,7 +161,6 @@ function buy( ii, g, auto ){
         updateCPS( ii );
         if( auto && ii !== v.selected ){}
         else{ display( v.selected ); }
-        saveState();
     }
 }
 
@@ -248,7 +247,6 @@ function complete( ind, auto ){
     selectTab( v.tab, v.miniTab );
     displayRuns();
     displayWings();
-    saveState();
 }
 
 function displayWings(){
