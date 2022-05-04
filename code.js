@@ -415,7 +415,7 @@ function buildTabContents( n, x ){
         t.appendChild( buildAssignBox() );
         t.appendChild( elem( `smallSpanLabel`, `Dormant Forces` ) );
         t.appendChild( buildRosterBox() );
-        t.appendChild( elem( `smallSpanLabel`, `<a class="combined">Spend ${numDisplay( global.recreateCost )}<div class="points costIcon"></div> to recreate a Cosmic Force:</a><div class="recreate"></div>` ) );
+        t.appendChild( elem( `smallSpanLabel`, `<a class="combined">Spend ${numDisplay( getRecreateCost() )}<div class="points costIcon"></div> to recreate a Cosmic Force:</a><div class="recreate"></div>` ) );
         v.tab = `points`;
         buildTooltips();
         populateTooltips();
@@ -763,8 +763,12 @@ function recruitJerk(){
     v.roster.push( new Jerk );
 }
 
+function getRecreateCost(){
+    return Math.floor( global.recreateCost * Math.pow( 1.1, v.recreates ) );
+}
+
 function recreateJerk( j ){
-    let c = global.recreateCost;// + v.recreates;
+    let c = getRecreateCost();
     if( v.curr.gained - v.curr.spent >= c ){
         v.curr.spent += c;
         v.recreates++;
