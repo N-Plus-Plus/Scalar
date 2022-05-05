@@ -8,8 +8,7 @@ function onLoad(){
     loadState();
     displayRewards();
     updateTabs();
-    if( v.tab !== null && v.tab !== `points` && v.miniTab !== null ){ selectTab( v.tab ); selectMiniTab( v.miniTab, v.tab ); }
-    else if( v.tab == `points` ){ selectTab( `points` ); };
+    if( v.tab !== null ){ selectTab( v.tab, v.miniTab ); }
     setInterval(() => { doLoop( now() ); }, global.tickSpeed );
     resetHold();
     displayWings();
@@ -61,7 +60,11 @@ function doLoop( tick ){
     if( Math.random() < v.spawnChance * Math.pow( 1.1, v.upgrades.clickSpawn ) ){ spawnClickMe(); }
     if( tick % 50 == 0 ){ saveState(); }
     v.ms.last = tick;
-    if( switches.updateDisplay ){ display( v.selected); }
+    if( switches.display ){ display( v.selected); }
+    if( switches.updateDisplay ){ updateDisplay(); }
+    if( switches.displayRewards ){ displayRewards(); }
+    if( switches.tabUpdate ){ updateTabDisplay(); }
+
 }
 
 function earn( ticks ){
@@ -243,15 +246,16 @@ function complete( ind, auto ){
     else{ v.completed[d]++; }
     v.curr.gained++;
     v.runs.splice(ind,1);
-    displayRewards();
+    switches.displayRewards = true;
     let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
     if( !auto ){ v.selected = nextSelection; }
     else if( ind == v.selected ){ v.selected = nextSelection; }
     else if( v.selected >= ind ){ v.selected--; }
-    switches.updateDisplay = true;
+    switches.display = true;
     topUpZeros();
     spawnCheck();
-    selectTab( v.tab, v.miniTab );
+    switches.tabUpdate = true;
+    switches.tabUpdate = true;
     displayRuns();
     displayWings();
 }
@@ -294,8 +298,8 @@ function topUpZeros(){
 function clickReward( type, t ){
     v.reward[type]++;
     t.parentElement.removeChild(t);
-    selectTab( v.tab, v.miniTab );
-    displayRewards();
+    switches.tabUpdate = true;
+    switches.displayRewards = true;
 }
 
 function display( index ){
@@ -312,6 +316,16 @@ function display( index ){
     updateCompleting();
     updateButtons();
     offsetRings();
+    switches.display = false;
+}
+
+function updateDisplay(){
+    let ind = parseInt( v.selected );
+    for( i in stat ){
+        document.querySelector(`[data-owned="${i}"]`).innerHTML = numDisplay( v.runs[ind].gen[i] );
+        document.querySelector(`[data-cost="${i}"]`).innerHTML = numDisplay( cost( ind, i ) );
+        document.querySelector(`[data-income="${i}"]`).innerHTML = numDisplay( getSingleCPS( ind, i ), true );
+    }
     switches.updateDisplay = false;
 }
 
@@ -323,7 +337,8 @@ function displayRewards(){
         if( v.reward[type] == undefined ){}
         else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( v.reward[type])}</div>`}
     }
-    t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`;    
+    t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`;
+    switches.displayRewards = false;
 }
 
 function updateTabs(){
@@ -361,13 +376,13 @@ function assignJerk( j, s ){
     for( jerk in v.roster ){ if( v.roster[jerk].assignment == s ){ v.roster[jerk].assignment = null; } }
     v.roster[j].assignment = s;
     clearJerkSelect();
-    selectTab( `points` );
+    selectTab( v.tab );
     switches.updateDisplay = true;
 }
 
 function unassignJerk( s ){
     for( jerk in v.roster ){ if( v.roster[jerk].assignment == s ){ v.roster[jerk].assignment = null; } }
-    selectTab( `points` );
+    selectTab( v.tab );
     switches.updateDisplay = true;
 }
 
@@ -387,6 +402,35 @@ function selectTab( n, m ){
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
     buildTabContents( d, m );
+}
+
+function updateTabDisplay(){
+    if( v.tab == `points` ){
+        for( i in upgrades ){
+            if( upgrades[i].scope == `global` ){
+                let id = upgrades[i].id;
+                document.querySelector(`[data-global-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[id] );
+                document.querySelector(`[data-global-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( null, id, null ) );
+            }
+        }
+    }
+    else{
+        let s = v.tab;
+        let m = v.miniTab;
+        for( i in upgrades ){
+            if( upgrades[i].scope == `span` ){
+                let id = upgrades[i].id;
+                document.querySelector(`[data-span-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id] );
+                document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( n, id, null ) );
+            }
+            if( upgrades[i].scope == `tier` ){
+                let id = upgrades[i].id;
+                document.querySelector(`[data-tier-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id][m] );
+                document.querySelector(`[data-tier-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( n, id, m ) );
+            }
+        }
+    }
+    switches.tabUpdate = false;
 }
 
 function selectMiniTab( n, d ){
@@ -413,8 +457,8 @@ function buildTabContents( n, x ){
                     r.appendChild( elem( `upgrade`, `Buy`, [[`uptype`,ch],[`scope`,`global`]] ) );
                     if( upgradeAfford( null, subj.id, null ) ){ r.lastChild.classList.add(`affordable`); }
                     r.appendChild( elem( `label bigCell`, subj.nice ) );
-                    r.appendChild( elem( `stat halfCell`, v.upgrades[ch] ) );
-                    r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( null, subj.id, null ) ) ) );
+                    r.appendChild( elem( `stat halfCell`, v.upgrades[ch], [[`global-bought`,ch]] ) );
+                    r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( null, subj.id, null ) ), [[`global-cost`,ch]] ) );
                     t.appendChild(r);
                 }
             }
@@ -442,8 +486,8 @@ function buildTabContents( n, x ){
                 r.appendChild( elem( `upgrade`, `Buy`, [[`upspan`,n],[`uptype`,ch],[`scope`,`span`]] ) );
                 if( upgradeAfford( n, subj.id, null ) ){ r.lastChild.classList.add(`affordable`); }
                 r.appendChild( elem( `label bigCell`, subj.nice ) );
-                r.appendChild( elem( `stat halfCell`, v.upgrades[n][ch] ) );
-                r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( n, subj.id, null ) ) ) );
+                r.appendChild( elem( `stat halfCell`, v.upgrades[n][ch], [[`span-bought`,ch]] ) );
+                r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( n, subj.id, null ) ), [[`span-cost`,ch]] ) );
                 t.appendChild(r);
             }
         }
@@ -468,8 +512,8 @@ function buildMiniTabContents( n, d ){
             r.appendChild( elem( `upgrade`, `Buy`, [[`upspan`,d],[`uptier`,n],[`uptype`,ch]],[`scope`,`span`] ) );
             if( upgradeAfford( d, subj.id, n ) ){ r.lastChild.classList.add(`affordable`); }
             r.appendChild( elem( `label bigCell`, subj.nice ) );
-            r.appendChild( elem( `stat halfCell`, v.upgrades[d][ch][n] ) );
-            r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( d, subj.id, n ) ) ) );
+            r.appendChild( elem( `stat halfCell`, v.upgrades[d][ch][n], [[`tier-bought`,ch]] ) );
+            r.appendChild( elem( `stat halfCell`, numDisplay( upgradeCost( d, subj.id, n ) ), [[`tier-cost`,ch]] ) );
             t.appendChild(r);
         }
     }
@@ -576,9 +620,9 @@ function buildContents( index ){
     for( i in stat ){
         let bR = elem( `tableRow` );
             bR.appendChild( elem( `button cell long`, gen[i], [[`buy`, i],[`index`,index]] ) );
-            bR.appendChild( elem( `stat cell`, numDisplay( v.runs[index].gen[i] ) ) );
-            bR.appendChild( elem( `stat cell`, numDisplay( cost( index, i ) ) ) );
-            bR.appendChild( elem( `stat cell`, numDisplay( getSingleCPS( index, i ), true ) ) );
+            bR.appendChild( elem( `stat cell`, numDisplay( v.runs[index].gen[i] ), [[`owned`,i]] ) );
+            bR.appendChild( elem( `stat cell`, numDisplay( cost( index, i ) ), [[`cost`,i]] ) );
+            bR.appendChild( elem( `stat cell`, numDisplay( getSingleCPS( index, i ), true ), [[`income`,i]] ) );
             bR.appendChild( elem( ``, ``, [[`ringMe`,i]]) );
             b.appendChild( bR );
         }
@@ -694,9 +738,8 @@ function buyUpgrade( d, type, tier ){
         }
         spawnCheck();
         switches.updateDisplay = true;
-        displayRewards();
-        if( d == null ){ d = `points`; }
-        selectTab( v.tab );
+        switches.displayRewards = true;        
+        switches.tabUpdate = true;        
     }
 }
 
@@ -779,7 +822,7 @@ function recreateJerk( j ){
         v.recreates++;
         let id = JSON.parse( JSON.stringify( v.roster[j].id ) );
         v.roster[j] = new Jerk( id );
-        displayRewards();
+        switches.displayRewards = true;
         selectTab( v.tab );
     }
     clearJerkSelect();
@@ -807,7 +850,7 @@ function rebirth( s ){
 
 function adjustQuestTargets(){
     for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / 1.1 ); }
-    switches.updateDisplay = true;
+    switches.display = true;
 }
 
 function calcZeros(){
@@ -836,8 +879,8 @@ function saveState(){
 function loadState(){
     let store = JSON.parse( localStorage.getItem( `v` ) );
     if( store !== null ){
-        if( store.version !== v.version ){ switches.updateDisplay = true; } // loop load data
-        else{ v = store; buildUpgrades(); switches.updateDisplay = true; dataFix(); }
+        if( store.version !== v.version ){ switches.display = true; } // loop load data
+        else{ v = store; buildUpgrades(); switches.display = true; dataFix(); }
     }
     else{
         v.ms.start = new Date().getTime() / global.tickSpeed;
@@ -921,7 +964,10 @@ const global = {
 }
 
 const switches = {
-    updateDisplay: true
+    display: true
+    , updateDisplay: true
+    , displayRewards: true
+    , tabUpdate: true
 }
 
 const upgrades = [
