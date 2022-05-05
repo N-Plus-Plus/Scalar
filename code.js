@@ -256,6 +256,7 @@ function complete( ind, auto ){
     switches.tabUpdate = true;
     switches.updateRuns = true;
     switches.displayRewards = true;
+    switches.updateTabButtons = true;
     displayWings();
 }
 
