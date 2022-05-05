@@ -55,7 +55,6 @@ function doLoop( tick ){
     earn( delta );
     progress();
     showStats();
-    updateButtons();
     scrollScroll();
     if( Math.random() < v.spawnChance * Math.pow( 1.1, v.upgrades.clickSpawn ) ){ spawnClickMe(); }
     if( tick % 50 == 0 ){ saveState(); }
@@ -64,7 +63,9 @@ function doLoop( tick ){
     if( switches.updateDisplay ){ updateDisplay(); }
     if( switches.displayRewards ){ displayRewards(); }
     if( switches.tabUpdate ){ updateTabDisplay(); }
-
+    if( switches.updateRuns ){ displayRuns(); }
+    if( switches.updateTabButtons ){ updateTabButtons(); }
+    updateButtons();
 }
 
 function earn( ticks ){
@@ -246,17 +247,14 @@ function complete( ind, auto ){
     else{ v.completed[d]++; }
     v.curr.gained++;
     v.runs.splice(ind,1);
-    switches.displayRewards = true;
     let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
-    if( !auto ){ v.selected = nextSelection; }
-    else if( ind == v.selected ){ v.selected = nextSelection; }
-    else if( v.selected >= ind ){ v.selected--; }
-    switches.display = true;
+    if( !auto ){ v.selected = nextSelection; switches.display = true; }
+    else if( ind == v.selected ){ v.selected = nextSelection; switches.display = true; }
+    else if( v.selected >= ind ){ v.selected--; switches.display = true; }
     topUpZeros();
     spawnCheck();
     switches.tabUpdate = true;
-    switches.tabUpdate = true;
-    displayRuns();
+    switches.updateRuns = true;
     displayWings();
 }
 
@@ -309,12 +307,11 @@ function display( index ){
     t.appendChild( buildContents( v.selected ) );
     forgeRings();
     ringPauseDisplay();
-    displayRuns();
+    switches.updateRuns = true;
     displayProgress();
     showStats();
     document.documentElement.style.setProperty('--span', span[v.runs[index].span].color );
     updateCompleting();
-    updateButtons();
     offsetRings();
     switches.display = false;
 }
@@ -401,7 +398,7 @@ function selectTab( n, m ){
     if( span[d] == undefined ){ color = `#656D78`; }
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
-    buildTabContents( d, m );
+    buildTabContents( d, m );    
 }
 
 function updateTabDisplay(){
@@ -421,12 +418,12 @@ function updateTabDisplay(){
             if( upgrades[i].scope == `span` ){
                 let id = upgrades[i].id;
                 document.querySelector(`[data-span-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id] );
-                document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( n, id, null ) );
+                document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, null ) );
             }
             if( upgrades[i].scope == `tier` ){
                 let id = upgrades[i].id;
                 document.querySelector(`[data-tier-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id][m] );
-                document.querySelector(`[data-tier-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( n, id, m ) );
+                document.querySelector(`[data-tier-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, m ) );
             }
         }
     }
@@ -585,6 +582,7 @@ function displayRuns(){
     let s = document.querySelectorAll(`[data-select]`);
     for( let i = 0; i < s.length; i++ ){ s[i].classList.remove(`selected`); }
     document.querySelector(`[data-select="${v.selected}"]`).classList.add(`selected`);
+    switches.updateRuns = false;
 }
 
 function buildContents( index ){
@@ -682,7 +680,19 @@ function updateButtons(){
     for( let i = 0; i < stat.length; i++ ){
         if( afford( v.selected, i ) ){ document.querySelector(`[data-buy="${i}"]`).classList.add( `available`); }
         else{ document.querySelector(`[data-buy="${i}"]`).classList.remove( `available`); }
+    }    
+}
+
+function updateTabButtons(){
+    let b = document.querySelectorAll(`.upgrade`);
+    for( i in b ){
+        let s = b[i].getAttribute(`data-upspan`);
+        let t = b[i].getAttribute(`data-uptier`);
+        let type = b[i].getAttribute(`data-uptype`);
+        if( upgradeAfford( s, type, t ) ){ b[i].classList.add(`affordable`); }
+        else{ b[i].classList.add(`affordable`); }
     }
+    switches.updateTabButtons = false;
 }
 
 function scrollScroll(){
@@ -723,7 +733,7 @@ function buyUpgrade( d, type, tier ){
         else{ v.curr.spent += upgradeCost( d, type, tier ); }
         if( d == null ){
             v.upgrades[type]++;
-            if( type == `maxZeros` ){ topUpZeros(); displayRuns(); }
+            if( type == `maxZeros` ){ topUpZeros(); switches.updateRuns = true; }
             if( type == `questTarget` ){ adjustQuestTargets(); }
             if( type == `recruitJerk` ){ recruitJerk(); }
         }
@@ -739,7 +749,8 @@ function buyUpgrade( d, type, tier ){
         spawnCheck();
         switches.updateDisplay = true;
         switches.displayRewards = true;        
-        switches.tabUpdate = true;        
+        switches.tabUpdate = true;
+        switches.updateTabButtons = true;
     }
 }
 
