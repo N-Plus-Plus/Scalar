@@ -495,7 +495,7 @@ function buildTabContents( n, x ){
             }
         }
     }
-    t.appendChild( elem( `upgradeHeading spanLabel`, `Tier Upgrades` ) );
+    t.appendChild( elem( `upgradeHeading spanLabel`, `Tier Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
     let mt = elem( `miniTabBox` );
     for( g in gg ){ mt.appendChild( elem( `miniTab`, gg[g], [[`minitab`,g],[`span`,n]] ) ); }
     t.appendChild( mt );
@@ -735,13 +735,14 @@ function spawnClickMe(){
 
 function buyUpgrade( d, type, tier ){
     if( upgradeAfford( d, type, tier ) ){
+        if( type == `childReq` && global.spanTarget + Object.keys(span).findIndex( e => e == d ) - v.upgrades[d].childReq <= 1 ){ return }
         if( d !== null ){ v.reward[span[d].curr] -= upgradeCost( d, type, tier ); }
         else{ v.curr.spent += upgradeCost( d, type, tier ); }
         if( d == null ){
             v.upgrades[type]++;
             if( type == `maxZeros` ){ topUpZeros(); switches.updateRuns = true; }
             if( type == `questTarget` ){ adjustQuestTargets(); }
-            if( type == `recruitJerk` ){ recruitJerk(); }
+            if( type == `recruitJerk` ){ recruitJerk(); selectTab( v.tab, v.miniTab ); }
         }
         else if( tier == null ){
             if( type == `rebirthSpan` ){ rebirth( d ); }
