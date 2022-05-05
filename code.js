@@ -303,7 +303,8 @@ function display( index ){
     showStats();
     document.documentElement.style.setProperty('--span', span[v.runs[index].span].color );
     updateCompleting();
-    updateButtons();    
+    updateButtons();
+    offsetRings();
 }
 
 function displayRewards(){
@@ -599,7 +600,6 @@ function forgeRings(){
         let id = rings[r].getAttribute(`data-ringMe`);
         rings[r].outerHTML += `<svg data-ring="${id}" xmlns="http://www.w3.org/2000/svg" class="ring" width="16" height="16"><circle class="circle" data-circle="${id}" cx="8" cy="8" r="4" stroke="var(--span)" stroke-width="8" fill="transparent" /></svg>`;
     }
-    offsetRings();
 }
 
 function offsetRings(){
@@ -764,7 +764,7 @@ function recruitJerk(){
 }
 
 function getRecreateCost(){
-    return Math.floor( global.recreateCost * Math.pow( 1.1, v.recreates ) );
+    return Math.floor( global.recreateCost * Math.pow( 1.05, v.recreates ) );
 }
 
 function recreateJerk( j ){
