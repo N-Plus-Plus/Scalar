@@ -417,13 +417,17 @@ function updateTabDisplay(){
         for( i in upgrades ){
             if( upgrades[i].scope == `span` ){
                 let id = upgrades[i].id;
-                document.querySelector(`[data-span-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id] );
-                document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, null ) );
+                if( document.querySelector(`[data-span-bought="${id}"]`) !== null ){
+                    document.querySelector(`[data-span-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id] );
+                    document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, null ) );
+                }
             }
             if( upgrades[i].scope == `tier` ){
                 let id = upgrades[i].id;
-                document.querySelector(`[data-tier-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id][m] );
-                document.querySelector(`[data-tier-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, m ) );
+                if( document.querySelector(`[data-tier-bought="${id}"]`) !== null ){
+                    document.querySelector(`[data-tier-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id][m] );
+                    document.querySelector(`[data-tier-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, m ) );
+                }
             }
         }
     }
@@ -685,12 +689,12 @@ function updateButtons(){
 
 function updateTabButtons(){
     let b = document.querySelectorAll(`.upgrade`);
-    for( i in b ){
+    for( let i = 0; i < b.length; i++ ){
         let s = b[i].getAttribute(`data-upspan`);
         let t = b[i].getAttribute(`data-uptier`);
         let type = b[i].getAttribute(`data-uptype`);
         if( upgradeAfford( s, type, t ) ){ b[i].classList.add(`affordable`); }
-        else{ b[i].classList.add(`affordable`); }
+        else{ b[i].classList.remove(`affordable`); }
     }
     switches.updateTabButtons = false;
 }
