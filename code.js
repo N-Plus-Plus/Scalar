@@ -60,6 +60,7 @@ function doLoop( tick ){
     if( Math.random() < v.spawnChance * Math.pow( 1.1, v.upgrades.clickSpawn ) ){ spawnClickMe(); }
     if( tick % 50 == 0 ){ saveState(); }
     v.ms.last = tick;
+    if( switches.updateDisplay ){ display( v.selected); }
 }
 
 function earn( ticks ){
@@ -81,40 +82,45 @@ function progress(){
             }
         }
         else{
-            switch( v.runs[r].quest.basis ){
-                case `cps`:
-                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.cps / v.runs[r].quest.target );
-                break;
-                case `balance`:
-                    v.runs[r].quest.progress = Math.min( 1, balance( r ) / v.runs[r].quest.target );
-                break;
-                case `own`:
-                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen.reduce( ( a, b ) => a + b ) / v.runs[r].quest.target );
-                break;
-                case `gained`:
-                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.gained / v.runs[r].quest.target );
-                break;
-                case `spent`:
-                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.spent / v.runs[r].quest.target );
-                break;
-                case `buy1Gen`:
-                    let t = v.runs[r].quest.tier;
-                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen[t] / Math.floor( v.runs[r].quest.target ) );
+            // let doUpdate = false;
+            // if( ( now() - v.runs[r].quest.commence ) % 10 && r !== v.selected ){ doUpdate = true; }// for performance, update progress twice per second (only) for non-selected
+            // else if( r == v.selected ){ doUpdate = true; }
+            // if( doUpdate ){
+                switch( v.runs[r].quest.basis ){
+                    case `cps`:
+                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.cps / v.runs[r].quest.target );
                     break;
-                case `buyNGen`:
-                    let ts = v.runs[r].quest.tier;
-                    let tt = Math.floor( v.runs[r].quest.target ) * ( ts + 1 );
-                    let ta = 0;
-                    for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
-                    v.runs[r].quest.progress = Math.min( 1, ta / tt );
-                break;
-            }            
-            if( v.runs[r].quest.progress == 1 ){
-                v.runs[r].quest.complete = true;
-                if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
-                    v.runs[r].completeIn = getAutoCompleteTime( r );
+                    case `balance`:
+                        v.runs[r].quest.progress = Math.min( 1, balance( r ) / v.runs[r].quest.target );
+                    break;
+                    case `own`:
+                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen.reduce( ( a, b ) => a + b ) / v.runs[r].quest.target );
+                    break;
+                    case `gained`:
+                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.gained / v.runs[r].quest.target );
+                    break;
+                    case `spent`:
+                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.spent / v.runs[r].quest.target );
+                    break;
+                    case `buy1Gen`:
+                        let t = v.runs[r].quest.tier;
+                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen[t] / Math.floor( v.runs[r].quest.target ) );
+                        break;
+                    case `buyNGen`:
+                        let ts = v.runs[r].quest.tier;
+                        let tt = Math.floor( v.runs[r].quest.target ) * ( ts + 1 );
+                        let ta = 0;
+                        for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
+                        v.runs[r].quest.progress = Math.min( 1, ta / tt );
+                    break;
+                }            
+                if( v.runs[r].quest.progress == 1 ){
+                    v.runs[r].quest.complete = true;
+                    if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
+                        v.runs[r].completeIn = getAutoCompleteTime( r );
+                    }
                 }
-            }
+            // }
         }
         for( a in v.runs[r].auto ){
             if( v.runs[r].auto[a] !== null ){
@@ -160,7 +166,7 @@ function buy( ii, g, auto ){
         v.runs[ii].gen[g]++;
         updateCPS( ii );
         if( auto && ii !== v.selected ){}
-        else{ display( v.selected ); }
+        else{ switches.updateDisplay = true; }
     }
 }
 
@@ -241,7 +247,7 @@ function complete( ind, auto ){
     if( !auto ){ v.selected = nextSelection; }
     else if( ind == v.selected ){ v.selected = nextSelection; }
     else if( v.selected >= ind ){ v.selected--; }
-    display( v.selected );
+    switches.updateDisplay = true;
     topUpZeros();
     spawnCheck();
     selectTab( v.tab, v.miniTab );
@@ -305,6 +311,7 @@ function display( index ){
     updateCompleting();
     updateButtons();
     offsetRings();
+    switches.updateDisplay = false;
 }
 
 function displayRewards(){
@@ -354,13 +361,13 @@ function assignJerk( j, s ){
     v.roster[j].assignment = s;
     clearJerkSelect();
     selectTab( `points` );
-    display( v.selected );
+    switches.updateDisplay = true;
 }
 
 function unassignJerk( s ){
     for( jerk in v.roster ){ if( v.roster[jerk].assignment == s ){ v.roster[jerk].assignment = null; } }
     selectTab( `points` );
-    display( v.selected );
+    switches.updateDisplay = true;
 }
 
 function getTraits( s ){
@@ -612,12 +619,9 @@ function offsetRings(){
                 let p = v.runs[v.selected].auto[`t${i}`] / autoBuyTime( v.runs[v.selected].span, i );
                 let circle = document.querySelector(`[data-circle="${i}"]`);
                 circle.classList.remove(`noDisplay`);
-                let radius = circle.r.baseVal.value;
-                let circumference = radius * 2 * Math.PI;
+                let circumference = circle.r.baseVal.value * 2 * Math.PI;
                 circle.style.strokeDasharray = `${circumference} ${circumference}`;
-                circle.style.strokeDashoffset = `${circumference}`;
-                const offset = p * circumference;
-                circle.style.strokeDashoffset = offset;
+                circle.style.strokeDashoffset = p * circumference;
             }
         }
     }
@@ -688,7 +692,7 @@ function buyUpgrade( d, type, tier ){
             if( type == `autoBuy` ){ updateAutoValues(); }
         }
         spawnCheck();
-        display( v.selected );
+        switches.updateDisplay = true;
         displayRewards();
         if( d == null ){ d = `points`; }
         selectTab( v.tab );
@@ -802,7 +806,7 @@ function rebirth( s ){
 
 function adjustQuestTargets(){
     for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / 1.1 ); }
-    display( v.selected );
+    switches.updateDisplay = true;
 }
 
 function calcZeros(){
@@ -831,8 +835,8 @@ function saveState(){
 function loadState(){
     let store = JSON.parse( localStorage.getItem( `v` ) );
     if( store !== null ){
-        if( store.version !== v.version ){ display( v.selected ); } // loop load data
-        else{ v = store; buildUpgrades(); display( v.selected ); dataFix(); }
+        if( store.version !== v.version ){ switches.updateDisplay = true; } // loop load data
+        else{ v = store; buildUpgrades(); switches.updateDisplay = true; dataFix(); }
     }
     else{
         v.ms.start = new Date().getTime() / global.tickSpeed;
@@ -913,6 +917,10 @@ const global = {
     , recreateCost: 5
     , recreateImproves: 0.8
     , tierLimit: 9
+}
+
+const switches = {
+    updateDisplay: false
 }
 
 const upgrades = [
