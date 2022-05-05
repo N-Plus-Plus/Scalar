@@ -858,7 +858,6 @@ function importState( state ){
 function download(state) {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(state));
-    // element.setAttribute('href', 'data:text/plain;charset=utf-8,' + state);
     element.setAttribute('download', now() + `.txt`);  
     element.style.display = 'none';
     document.body.appendChild(element);  
@@ -867,10 +866,10 @@ function download(state) {
   }
 
 function dataFix(){
-    delete v.upgrades.rosterSize;
-    if( v.recreates == undefined ){ v.recreates = 0; }
-    if( v.removedDoubleCount == undefined ){ v.upgrades[`0`].rebirthSpan--; v.removedDoubleCount = true; }
-    v.spawnChance = 1 / 5e3;
+    // delete v.upgrades.rosterSize;
+    // if( v.recreates == undefined ){ v.recreates = 0; }
+    // if( v.removedDoubleCount == undefined ){ v.upgrades[`0`].rebirthSpan--; v.removedDoubleCount = true; }
+    // v.spawnChance = 1 / 5e3;
 }
 
 function resetData(){
@@ -1117,6 +1116,8 @@ function shuffle( a ) {
 }
 
 function numDisplay( x, precise ){
+    let suffix = ``;
+    if( x >= 1e6 ){ suffix = `e` + Math.floor( Math.log10( x ) ); x *= Math.pow( 0.1, Math.floor( Math.log10( x ) ) ); precise = true; }
     let precision = 0;
     if( precise ){ precision = Math.max( 0, 3 - String(x).split(`.`)[0].length ); }
     let remainder = String(x).split(`.`)[1];
@@ -1124,7 +1125,7 @@ function numDisplay( x, precise ){
     var pattern = /(-?\d+)(\d{3})/;
     while( pattern.test( o ) ){ o = o.replace( pattern, "$1,$2" ); }
     if( precision !== 0 && remainder !== undefined ){ o = o + `.` + remainder.substring( 0, 0 + precision ); }
-    return o;
+    return o + suffix;
 }
 
 const helpful = [
