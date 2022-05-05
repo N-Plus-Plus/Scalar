@@ -255,6 +255,7 @@ function complete( ind, auto ){
     spawnCheck();
     switches.tabUpdate = true;
     switches.updateRuns = true;
+    switches.displayRewards = true;
     displayWings();
 }
 
@@ -1235,9 +1236,12 @@ Prestige
 When adding AutoComplete, need to sweep and commence those runs
 Jerk trait - trickle income
 
-Tooltip invisible when jerk selected...
 Don't glow the recreator when you can't afford to use it (maybe don't even display it?)
-?? complete() not updating points buttons
+
+
+ENDGAME
+Build one Scalar to retire the whole run, and be presented with a menu of features to add, remove, or modify
+
 
 Uncertainty     None
 Particles       Higgs Boson
