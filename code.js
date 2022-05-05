@@ -953,8 +953,8 @@ const questDef = [
     , { basis: `cps`,       target: 1e4, verbiage: `Reach N Q Per Second` }
     , { basis: `spent`,     target: 5e6, verbiage: `Spend N Q` }
     , { basis: `own`,       target: 250, verbiage: `Own N ! Generators` }
-    , { basis: `buy1Gen`,   target: [{a:70,t:0},{a:65,t:1},{a:60,t:2},{a:55,t:3},{a:50,t:4},{a:45,t:5},{a:40,t:6},{a:30,t:7},{a:20,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators`}
-    , { basis: `buyNGen`,   target: [{a:55,t:1},{a:50,t:2},{a:45,t:3},{a:40,t:4},{a:35,t:5},{a:30,t:6},{a:25,t:7},{a:15,t:8},{a:5,t:9}], verbiage: `Buy N Tier I to $ Generators`}
+    , { basis: `buy1Gen`,   target: [{a:60,t:0},{a:55,t:1},{a:50,t:2},{a:45,t:3},{a:40,t:4},{a:35,t:5},{a:30,t:6},{a:25,t:7},{a:15,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators`}
+    , { basis: `buyNGen`,   target: [{a:50,t:1},{a:45,t:2},{a:40,t:3},{a:35,t:4},{a:30,t:5},{a:25,t:6},{a:20,t:7},{a:15,t:8},{a:5,t:9}], verbiage: `Buy N Tier I to $ Generators`}
 ]
 
 const gen = [`Tier I`,`Tier II`,`Tier III`,`Tier IV`,`Tier V`,`Tier VI`,`Tier VII`,`Tier VIII`,`Tier IX`,`Tier X`];
