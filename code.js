@@ -14,6 +14,7 @@ function onLoad(){
     resetHold();
     displayWings();
     addScroll();
+    display(v.selected);
 }
 
 function clicked(e){
@@ -920,7 +921,7 @@ const global = {
 }
 
 const switches = {
-    updateDisplay: false
+    updateDisplay: true
 }
 
 const upgrades = [
