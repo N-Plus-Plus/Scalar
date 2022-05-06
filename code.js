@@ -235,7 +235,9 @@ function getSingleCPS( index, i ){
 }
 
 function calcReward( index ){
-    return Math.floor( Math.log10( balance( index ) ) );
+    let o = Math.floor( Math.log10( balance( index ) ) );
+    if( isNaN( o ) ){ o = 5; }
+    return o;
 }
 
 function complete( ind, auto ){
@@ -877,7 +879,7 @@ function calcZeros(){
 
 function autoBuyTime( d, t ){
     let o = global.autoBuy + global.autoBuy * ( t + 1 ) / 2;
-    o *= Math.pow( 1 / 1.1, v.upgrades[d].autoBuy[t] );
+    o *= Math.pow( 1 / global.scale.autoBuyTier, v.upgrades[d].autoBuy[t] );
     let tr = getTraits( d );
     for( a in tr ){
         if( tr[a].id == `fastBuy` ){ o *= ( 1 - tr[a].amt ) }
@@ -965,7 +967,7 @@ var v = {
 }
 
 const global = {
-    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5, headStart: 1.25 }
+    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5, headStart: 1.1, autoBuyTier: 1.1 }
     , tickSpeed: 50
     , spanTarget: 5
     , zeros: 1
@@ -1229,16 +1231,7 @@ function addTestData(){
 /*
 
 TODO
-Run progress bar in side menu
-More Complex Quests
-Deduplicate and sort Jerk Traits
-Fastest Quantum Lap does something?
-Prestige
-
 When adding AutoComplete, need to sweep and commence those runs
-Jerk trait - trickle income
-
-Don't glow the recreator when you can't afford to use it (maybe don't even display it?)
 
 
 ENDGAME
@@ -1249,9 +1242,9 @@ Uncertainty     None
 Particles       Higgs Boson
 Atoms           Split Atom
 Molecules       Anti-Matter
-Organelles      
-Cells           
-Organisms       
+Organelles      Mitochondrial Degrade
+Cells           Cancer
+Organisms       Warfare
 Ideas           Superintelligence
 Code            Divided by zero
 Features        
