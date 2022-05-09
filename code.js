@@ -796,7 +796,6 @@ function spawnClickMe(){
     for( key in v.reward ){ arr.push( span.findIndex( e => e.curr == key ) ); }
     if( arr.length > 0 ){
         let nonce = Math.floor( Math.min( arr.length - 1, Math.random() * arr.length * Math.pow( getBenefit(`clickTilting`), ( v.upgrades.clickTilting == undefined ? 0 : v.upgrades.clickTilting) ) ) );
-        console.log(arr[nonce].curr)
         let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,span[nonce].curr]] );
         e.style.left = Math.floor( 2 + Math.random() * window.innerWidth / 16 ) - 4 + `rem`;
         e.style.top = Math.floor( 2 + Math.random() * window.innerHeight / 16 ) - 4 + `rem`;
