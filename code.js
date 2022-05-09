@@ -4,6 +4,8 @@ window.addEventListener("mouseup", function (e) { resetHold(); } );
 window.addEventListener("keydown", function(e) { pressed( e ) } );
 
 function onLoad(){
+    loadMeta();
+    extrapolateMeta();
     buildStat();
     loadState();
     displayRewards();
@@ -13,7 +15,9 @@ function onLoad(){
     resetHold();
     displayWings();
     addScroll();
-    display(v.selected);
+    topUpZeros();
+    if( v.selected == null ){ display( 0 ); }
+    else{ display( v.selected ); }
 }
 
 function clicked(e){
@@ -29,6 +33,12 @@ function clicked(e){
     if( c.contains(`autoBuy`) ){ pauseAuto( v.selected ); }
     if( c.contains(`ring`) ){ pauseAuto( v.selected, t.getAttribute(`data-ring` ) ); }
     if( c.contains(`slot`) && v.jerkSelected !== null ){ assignJerk( v.jerkSelected, t.getAttribute(`data-slot` ) ); }
+    if( c.contains(`restart`) ){ doItAllOverAgain(); }
+    if( c.contains(`slider`) ){ toggleFeature( t.getAttribute(`data-feature`), t.parentElement.children[0].checked, t.getAttribute(`data-feature-group`) ); }
+    if( c.contains(`buyU`) ){ buyFeature( t.getAttribute(`data-feature`), t.getAttribute(`data-feature-group`) ); }
+    if( c.contains(`abandon`) ){ recreateRun( v.selected ); }
+    if( c.contains(`confirm`) ){ renderUndex(); }
+    if( c.contains(`prestige`) ){ safetyOff(); }
     else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
     else if( c.contains(`tooltip`) ){
         t = t.parentElement;
@@ -51,27 +61,47 @@ function pressed(e){
 }
 
 function doLoop( tick ){
-    let delta = ( tick - v.ms.last ) * global.godMode;
-    earn( delta );
-    progress();
-    showStats();
+    if( global.paused ){}
+    else{
+        let delta = ( tick - v.ms.last ) * global.godMode;
+        earn( delta );
+        progress();
+        countdownAbandon( delta );
+        showStats();
+        if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
+        if( tick % 50 == 0 ){ saveState(); }
+        v.ms.last = tick;
+        if( switches.display ){ display( v.selected); }
+        if( switches.updateDisplay ){ updateDisplay(); }
+        if( switches.displayRewards ){ displayRewards(); }
+        if( switches.tabUpdate ){ updateTabDisplay(); }
+        if( switches.updateRuns ){ displayRuns(); }
+        if( switches.updateTabButtons ){ updateTabButtons(); }
+        updateButtons();
+    }
     scrollScroll();
-    if( Math.random() < v.spawnChance * Math.pow( 1.1, v.upgrades.clickSpawn ) ){ spawnClickMe(); }
-    if( tick % 50 == 0 ){ saveState(); }
-    v.ms.last = tick;
-    if( switches.display ){ display( v.selected); }
-    if( switches.updateDisplay ){ updateDisplay(); }
-    if( switches.displayRewards ){ displayRewards(); }
-    if( switches.tabUpdate ){ updateTabDisplay(); }
-    if( switches.updateRuns ){ displayRuns(); }
-    if( switches.updateTabButtons ){ updateTabButtons(); }
-    updateButtons();
 }
 
 function earn( ticks ){
     let quanta = ticks * ( global.tickSpeed / 1000 );
     for( r in v.runs ){
         v.runs[r].curr.gained += v.runs[r].curr.cps * quanta;
+    }
+}
+
+function countdownAbandon( ticks ){
+    let quanta = Math.ceil( ticks * ( global.tickSpeed / 1000 ) );
+    for( i in v.abandonTime ){
+        if( v.abandonTime[i] == 0 ){}
+        else if( v.abandonTime[i] > 0 ){ 
+            v.abandonTime[i] -= quanta;
+            if( v.abandonTime[i] <= 0 ){ 
+                v.abandonTime[i] = 0;
+                if( v.runs[v.selected].span == i ){
+                    document.querySelector(`[data-abandon]`).classList.add(`available`);
+                }
+            }
+        }
     }
 }
 
@@ -87,45 +117,50 @@ function progress(){
             }
         }
         else{
-            // let doUpdate = false;
-            // if( ( now() - v.runs[r].quest.commence ) % 10 && r !== v.selected ){ doUpdate = true; }// for performance, update progress twice per second (only) for non-selected
-            // else if( r == v.selected ){ doUpdate = true; }
-            // if( doUpdate ){
-                switch( v.runs[r].quest.basis ){
-                    case `cps`:
-                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.cps / v.runs[r].quest.target );
-                    break;
-                    case `balance`:
-                        v.runs[r].quest.progress = Math.min( 1, balance( r ) / v.runs[r].quest.target );
-                    break;
-                    case `own`:
-                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen.reduce( ( a, b ) => a + b ) / v.runs[r].quest.target );
-                    break;
-                    case `gained`:
-                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.gained / v.runs[r].quest.target );
-                    break;
-                    case `spent`:
-                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.spent / v.runs[r].quest.target );
-                    break;
-                    case `buy1Gen`:
-                        let t = v.runs[r].quest.tier;
-                        v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen[t] / Math.floor( v.runs[r].quest.target ) );
-                        break;
-                    case `buyNGen`:
-                        let ts = v.runs[r].quest.tier;
-                        let tt = Math.floor( v.runs[r].quest.target ) * ( ts + 1 );
-                        let ta = 0;
-                        for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
-                        v.runs[r].quest.progress = Math.min( 1, ta / tt );
-                    break;
-                }            
-                if( v.runs[r].quest.progress == 1 ){
-                    v.runs[r].quest.complete = true;
-                    if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
-                        v.runs[r].completeIn = getAutoCompleteTime( r );
+            switch( v.runs[r].quest.basis ){
+                case `cps`:
+                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.cps / v.runs[r].quest.target );
+                break;
+                case `balance`:
+                    v.runs[r].quest.progress = Math.min( 1, balance( r ) / v.runs[r].quest.target );
+                break;
+                case `own`:
+                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen.reduce( ( a, b ) => a + b ) / v.runs[r].quest.target );
+                break;
+                case `gained`:
+                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.gained / v.runs[r].quest.target );
+                break;
+                case `spent`:
+                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].curr.spent / v.runs[r].quest.target );
+                break;
+                case `spend`:
+                    let x = 0;
+                    for( let i = 0; i < global.ranks; i++ ){
+                        if( v.runs[r].gen[i] > 0 ){
+                            let c = cost( r, i ) / global.scale.buy; 
+                            if( c > x ){ x = c; }
+                        }
                     }
+                    v.runs[r].quest.progress = Math.min( 1, x / Math.floor( v.runs[r].quest.target ) );
+                break;
+                case `buy1Gen`:
+                    let t = v.runs[r].quest.tier;
+                    v.runs[r].quest.progress = Math.min( 1, v.runs[r].gen[t] / Math.floor( v.runs[r].quest.target ) );
+                    break;
+                case `buyNGen`:
+                    let ts = v.runs[r].quest.tier;
+                    let tt = Math.floor( v.runs[r].quest.target ) * ( ts + 1 );
+                    let ta = 0;
+                    for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
+                    v.runs[r].quest.progress = Math.min( 1, ta / tt );
+                break;
+            }            
+            if( v.runs[r].quest.progress >= 1 ){
+                v.runs[r].quest.complete = true;
+                if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
+                    v.runs[r].completeIn = getAutoCompleteTime( r );
                 }
-            // }
+            }
         }
         for( a in v.runs[r].auto ){
             if( v.runs[r].auto[a] !== null ){
@@ -195,7 +230,11 @@ function cost( index, g ){
 
 function uCost( span, g ){
     let n = v.upgrades[span].headStart[g];
-    return Math.pow( global.scale.headStart, n ) * stat[g].cost;
+    return Math.pow( global.scale.buy, n ) * stat[g].cost;
+}
+
+function getBenefit( up ){
+    return upgrades.filter( e => e.id == up )[0].benefit;
 }
 
 function balance( index, clean ){
@@ -216,6 +255,10 @@ function updateCPS( index ){
     for( i in v.runs[index].gen ){
         cps += getCPS( index, i, false );
     }
+    let tr = getTraits( v.runs[index].span );
+    for( a in tr ){ if( tr[a].id == `trickleIncome` ){ cps += tr[a].amt * 100; } }
+    let speedBoost = 1;
+    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( v.fastest[v.runs[index].span] / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }
     v.runs[index].curr.cps = Math.floor( cps );
 }
 
@@ -225,7 +268,7 @@ function getCPS( index, i ){
 }
 
 function getSingleCPS( index, i ){
-    let o = stat[i].adds * Math.pow( Math.pow( 1.005, v.upgrades[v.runs[index].span].bulkBonus[i] ), v.runs[index].gen[i] );
+    let o = stat[i].adds * Math.pow( Math.pow( getBenefit( `bulkBonus` ), v.upgrades[v.runs[index].span].bulkBonus[i] ), v.runs[index].gen[i] );
     let tr = getTraits( v.runs[index].span );
     for( a in tr ){
         if( tr[a].id == `moreOutput` && i == tr[a].t ){ o *= ( 1 + tr[a].amt ) }
@@ -243,6 +286,8 @@ function calcReward( index ){
 function complete( ind, auto ){
     if( !v.runs[ind].quest.complete ){ return; }
     let d = parseFloat( JSON.parse( JSON.stringify( v.runs[ind].span ) ) );
+    let time = parseInt( JSON.parse( JSON.stringify( now() - v.runs[ind].quest.commence ) ) );
+    if( time < v.fastest[d] || v.fastest[d] == 0 ){ v.fastest[d] = time; }
     if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = 0; }
     v.reward[span[d].curr] += calcReward( ind );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
@@ -295,6 +340,7 @@ function topUpZeros(){
         v.runs.push( new Run( 0 ) );
         updateCPS( v.runs.length - 1 );
     }
+    for( r in v.runs ){ if( v.runs[r].quest.target < 1 ){ v.runs[r].quest.target = 1 } }
 }
 
 function clickReward( type, t ){
@@ -377,12 +423,14 @@ function assignJerk( j, s ){
     for( jerk in v.roster ){ if( v.roster[jerk].assignment == s ){ v.roster[jerk].assignment = null; } }
     v.roster[j].assignment = s;
     clearJerkSelect();
+    updateCPS( v.selected )
     selectTab( v.tab );
     switches.updateDisplay = true;
 }
 
 function unassignJerk( s ){
     for( jerk in v.roster ){ if( v.roster[jerk].assignment == s ){ v.roster[jerk].assignment = null; } }
+    updateCPS( v.selected )
     selectTab( v.tab );
     switches.updateDisplay = true;
 }
@@ -408,7 +456,7 @@ function selectTab( n, m ){
 function updateTabDisplay(){
     if( v.tab == `points` ){
         for( i in upgrades ){
-            if( upgrades[i].scope == `global` ){
+            if( upgrades[i].scope == `global` && !upgrades[i].locked ){
                 let id = upgrades[i].id;
                 document.querySelector(`[data-global-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[id] );
                 document.querySelector(`[data-global-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( null, id, null ) );
@@ -419,14 +467,14 @@ function updateTabDisplay(){
         let s = v.tab;
         let m = v.miniTab;
         for( i in upgrades ){
-            if( upgrades[i].scope == `span` ){
+            if( upgrades[i].scope == `span` && !upgrades[i].locked ){
                 let id = upgrades[i].id;
                 if( document.querySelector(`[data-span-bought="${id}"]`) !== null ){
                     document.querySelector(`[data-span-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id] );
                     document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, null ) );
                 }
             }
-            if( upgrades[i].scope == `tier` ){
+            if( upgrades[i].scope == `tier` && !upgrades[i].locked ){
                 let id = upgrades[i].id;
                 if( document.querySelector(`[data-tier-bought="${id}"]`) !== null ){
                     document.querySelector(`[data-tier-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id][m] );
@@ -496,6 +544,15 @@ function buildTabContents( n, x ){
                 t.appendChild(r);
             }
         }
+    }
+    if( n == 9 ){
+        let xr = elem( `upgradeRow` );
+        xr.appendChild( elem( `prestige`, `Commit` ) );
+        xr.lastChild.classList.add(`affordable`);
+        xr.appendChild( elem( `label bigCell`, `Rebuild Scalar` ) );
+        xr.appendChild( elem( `stat halfCell`, numDisplay( meta.laps ) ) );
+        xr.appendChild( elem( `stat halfCell`, 0 ) );
+        t.appendChild(xr);
     }
     t.appendChild( elem( `upgradeHeading spanLabel`, `Tier Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
     let mt = elem( `miniTabBox` );
@@ -575,10 +632,11 @@ function buildTooltips(){
 function displayRuns(){
     let t = document.querySelector(`#runs`);
     t.innerHTML = ``;
-    for( let i = v.watermark + 1; i >= 0; i-- ){
+    for( let i = Math.min( 9, v.watermark + 1 ); i >= 0; i-- ){
         let k = Object.keys(span)[i];
         let e = elem( `spanBox` );
             if( i == 0 ){ e.appendChild( elem( `spanLabel`, span[i].label + `<div class="smaller">Max: ${numDisplay( calcZeros() )}</div>` ) ); }
+            else if( i == 9 ){ e.appendChild( elem( `spanLabel`, span[i].label + `<div class="smaller">${numDisplay( completeBalance( Object.keys(span)[i-1] ) )} / ${getTarget( k )}</div>` ) ); }
             else{ e.appendChild( elem( `spanLabel`, span[i].label + `<div class="smaller">${numDisplay( completeBalance( Object.keys(span)[i-1] ) )} / ${getTarget( k )}</div>` ) ); }
             e.appendChild( elem( `spanSubBox`, ``, [[`selector`,k]] ) );
             t.appendChild( e );
@@ -614,6 +672,9 @@ function buildContents( index ){
     let s = elem( `statBox` );
         s.appendChild( elem( `statRow`, `${span[v.runs[index].span].curr} Held: <a class="num" data-balance=${index}>${numDisplay( balance( index ) )}</a>` ) );
         s.appendChild( elem( `statRow`, `${span[v.runs[index].span].curr} Per Second: <a class="num" data-cps=${index}>${numDisplay( v.runs[index].curr.cps, true )}</a>` ) );
+        if( v.upgrades[v.runs[index].span].abandonQuest > 0 ){
+            s.appendChild( elem( `abandon ${v.abandonTime[v.runs[index].span] == 0 ? 'available' : '' }`, `Abandon`, [[`abandon`,v.runs[index].span]] ) );
+        }
     o.appendChild( s );
     let b = elem( `tableBox` );
     let bH = elem( `tableHeadings` );
@@ -647,8 +708,16 @@ function elem( cl, inner, attr ){
     return e;
 }
 
+function buildToggle( d, st, grp ){
+    let l = document.createElement(`label`);
+        l.classList = `switch`;
+        l.innerHTML = `<input type="checkbox" ${st?``:`checked`}><span data-feature="${d}" data-feature-group="${grp}" class="slider"></span>`;    
+    return l;
+}
+
 function showStats(){
     document.querySelector(`[data-balance]`).innerHTML = numDisplay( balance( v.selected ) );
+    document.querySelector(`[data-cps]`).innerHTML = numDisplay( v.runs[v.selected].curr.cps );
     if( v.runs[v.selected].quest.complete ){ document.querySelector(`.complete`).innerHTML = `Complete Quest for ${calcReward( v.selected )} <div class="rewardIcon s${v.runs[v.selected].span}"></div>`; }
 }
 
@@ -716,6 +785,7 @@ function scrollScroll(){
 
 function addScroll(){
     let v = shuffle(helpful)[0];
+    if( global.paused ){ v = shuffle(helpless)[0]; }
     document.querySelector(`#footer`).appendChild( elem( `scroll` , v, [[`transform`,window.innerWidth]] ) );
     scrollScroll();
 }
@@ -724,7 +794,7 @@ function spawnClickMe(){
     let arr = [];
     for( key in v.reward ){ arr.push( span.findIndex( e => e.curr == key ) ); }
     if( arr.length > 0 ){
-        let nonce = Math.floor( Math.random() * arr.length );
+        let nonce = Math.floor( Math.min( arr.length - 1, Math.random() * arr.length * Math.pow( getBenefit(`clickTilting`), v.upgrades.clickTilting ) ) );
         let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,span[nonce].curr]] );
         e.style.left = Math.floor( 2 + Math.random() * window.innerWidth / 16 ) - 4 + `rem`;
         e.style.top = Math.floor( 2 + Math.random() * window.innerHeight / 16 ) - 4 + `rem`;
@@ -749,12 +819,14 @@ function buyUpgrade( d, type, tier ){
         else if( tier == null ){
             if( type == `rebirthSpan` ){ rebirth( d ); }
             else{ v.upgrades[d][type]++; }
+            if( type == `abandonQuest` ){ switches.display = true; }
         }
         else{
             v.upgrades[d][type][tier]++;
             buildMiniTabContents( tier, d );
             if( type == `autoBuy` ){ updateAutoValues(); }
         }
+        if( type == `childReq` && global.spanTarget + Object.keys(span).findIndex( e => e == d ) - v.upgrades[d].childReq == 2 ){ selectTab( v.tab, v.miniTab ); }
         spawnCheck();
         switches.updateDisplay = true;
         switches.displayRewards = true;        
@@ -832,7 +904,7 @@ function recruitJerk(){
 }
 
 function getRecreateCost(){
-    return Math.floor( global.recreateCost * Math.pow( 1.05, v.recreates ) );
+    return Math.floor( global.recreateCost * Math.pow( getBenefit( `creepReduce` ), v.recreates ) );
 }
 
 function recreateJerk( j ){
@@ -858,6 +930,18 @@ function nextDef( d ){
     return arr[index];
 }
 
+function recreateRun( index ){
+    let d = v.runs[index].span;
+    if( v.abandonTime[d] == 0 ){
+        v.runs[index] = new Run( d );
+        switches.display = true;
+        let t = global.abandonTimer * ( 1000 / global.tickSpeed );
+        t *= Math.pow( 1 / getBenefit(`abandonQuest`), v.upgrades[d].abandonQuest );
+        v.abandonTime[d] = t; // FIX THIS
+        document.querySelector(`[data-abandon]`).classList.remove(`available`);
+    }
+}
+
 function rebirth( s ){
     let n = JSON.stringify( JSON.parse( v.upgrades[s].rebirthSpan ) );
     delete v.upgrades[s];
@@ -869,7 +953,7 @@ function rebirth( s ){
 }
 
 function adjustQuestTargets(){
-    for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / 1.1 ); }
+    for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / getBenefit( `questTarget` ) ); }
     switches.display = true;
 }
 
@@ -893,7 +977,12 @@ function autoBuyTime( d, t ){
 
 function saveState(){
     localStorage.setItem( `v` , JSON.stringify( v ) );
-    localStorage.setItem( `multi` , JSON.stringify( v.multi ) );
+    localStorage.setItem( `meta` , JSON.stringify( meta ) );
+}
+
+function loadMeta(){
+    let mStore = JSON.parse( localStorage.getItem( `meta` ) );
+    if( mStore !== null ){ meta = mStore; }
 }
 
 function loadState(){
@@ -909,11 +998,10 @@ function loadState(){
         topUpZeros();
         display( 0 );
     }
-    setIco( v.watermark );
+    setIco( v.watermark );    
 }
 
 function exportState(){
-    // let state = localStorage.getItem(`v`);
     download( localStorage.getItem(`v`) );
 }
 
@@ -934,10 +1022,177 @@ function download(state) {
   }
 
 function dataFix(){
-    // delete v.upgrades.rosterSize;
-    // if( v.recreates == undefined ){ v.recreates = 0; }
-    // if( v.removedDoubleCount == undefined ){ v.upgrades[`0`].rebirthSpan--; v.removedDoubleCount = true; }
-    // v.spawnChance = 1 / 5e3;
+    if( v.fastest == undefined ){ v.fastest = []; }
+    for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
+    if( v.abandonTime == undefined ){ v.abandonTime = []; }
+    for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
+}
+
+function safetyOff(){
+    if( v.reward.Features == undefined ){ return }
+    document.querySelector(`.prestige`).innerHTML = `Confirm`;
+    document.querySelector(`.prestige`).classList.add(`confirm`);
+}
+
+function renderUndex(){
+    global.paused = true;
+    let t = document.querySelector(`#undex`);
+        t.classList.remove(`noDisplay`);
+        t.innerHTML = ``;
+    let p = document.querySelector(`#play`);
+        p.classList.add(`noDisplay`);
+    let pre = elem( `preambleBox` );
+        pre.appendChild( elem( `preamble large`, `Let the feature creep begin.` ) );
+        pre.appendChild( elem( `preamble`, `Every change you make below will increase <b>all</b> costs by 1 due to the added complexity in the Scalar code. Choose wisely.` ) );
+        pre.appendChild( elem( `preamble`, `Once you've rebuilt the game anew (i.e. completed another lap), this inflation will reduce to +1 per lap thanks to refactoring.` ) );
+    t.appendChild( pre );
+    t.appendChild( elem( `featureHeading`, `Upgrades<div class="scalarCost"><div class="scalarLabel">Enable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div><div class="scalarLabel">Disable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div></div>` ) );
+    let u2 = elem( `featureBox` );
+    for( i in meta.upgrades ){
+        let u3 = elem( `featureToggle` );
+            u3.appendChild( buildToggle( meta.upgrades[i].id, meta.upgrades[i].locked, `upgrades` ) );
+            u3.appendChild( elem( `feature`, meta.upgrades[i].p.nice ) );
+            u2.appendChild( u3 );
+    }
+    t.appendChild( u2 );
+    t.appendChild( elem( `featureHeading`, `Quests<div class="scalarCost"><div class="scalarLabel">Enable Cost:</div><div class="scalarNum" data-fcost="questOn"></div><div class="scalarLabel">Disable Cost:</div><div class="scalarNum" data-fcost="questOff"></div></div>` ) );
+    let q2 = elem( `featureBox` );
+        for( i in meta.questDef ){
+        let q3 = elem( `featureToggle` );
+            q3.appendChild( buildToggle( meta.questDef[i].basis, meta.questDef[i].locked, `questDef` ) );
+            q3.appendChild( elem( `feature`, meta.questDef[i].nice ) );
+            q2.appendChild( q3 );
+        }
+        t.appendChild( q2 );
+        t.appendChild( elem( `featureHeading`, `Cosmic Force Traits<div class="scalarCost"><div class="scalarLabel">Enable Cost:</div><div class="scalarNum" data-fcost="traitOn"></div><div class="scalarLabel">Disable Cost:</div><div class="scalarNum" data-fcost="traitOff"></div></div>` ) );
+        let t2 = elem( `featureBox` );
+        for( i in meta.jerkTraits ){
+            let t3 = elem( `featureToggle` );
+            t3.appendChild( buildToggle( meta.jerkTraits[i].id, meta.jerkTraits[i].locked, `jerkTraits` ) );
+            t3.appendChild( elem( `feature`, meta.jerkTraits[i].nice ) );
+            t2.appendChild( t3 );
+        }
+    t.appendChild( t2 );
+    t.appendChild( elem( `featureHeading`, `Limits<div class="scalarCost"><div class="scalarLabel">Limit Change Cost:</div><div class="scalarNum" data-fcost="limitChange"></div></div>` ) );
+    let l2 = elem( `featureBox` );
+        for( i in meta.limits ){
+            let l3 = elem( `featureToggle` );
+                l3.appendChild( elem( `buyU`, meta.limits[i].does, [[`feature`,meta.limits[i].id],[`feature-group`,`limits`]] ) );
+                l3.appendChild( elem( `feature`, meta.limits[i].nice ) );
+                l2.appendChild( l3 );
+        }
+    t.appendChild( l2 );
+    t.appendChild( elem( `featureHeading`, `Scale<div class="scalarCost"><div class="scalarLabel">Scale Change Cost:</div><div class="scalarNum" data-fcost="scaleChange"></div></div>` ) );
+    let s2 = elem( `featureBox` );
+        for( i in meta.scale ){
+            let s3 = elem( `featureToggle` );
+                s3.appendChild( elem( `buyU`, meta.scale[i].does, [[`feature`,meta.scale[i].id],[`feature-group`,`scale`]] ) );
+                s3.appendChild( elem( `feature`, meta.scale[i].nice ) );
+                s2.appendChild( s3 );
+        }
+    t.appendChild( s2 );
+    // t.appendChild( elem( `featureHeading`, `Totally New Features` ) );
+    // let n2 = elem( `featureBox` );
+    //     for( i in meta.newFeatures ){
+    //         let n3 = elem( `featureToggle` );
+    //             n3.appendChild( elem( `buyU`, meta.newFeatures[i].does, [[`feature`,meta.newFeatures[i].id],[`feature-group`,`newFeatures`]] ) );
+    //             n3.appendChild( elem( `feature`, meta.newFeatures[i].nice ) );
+    //             n2.appendChild( n3 );
+    //     }
+    // t.appendChild( n2 );
+    t.appendChild( elem( `restart`, `Commit Changes & Start Over` ) );
+    undexButtons();
+}
+
+function toggleFeature( f, st, grp ){
+    if( v.reward.Features == undefined ){ return }
+    let a = scalarAfford( grp, f, st );
+    let s = meta[grp].filter( e => e.id == f || e.basis == f )[0];
+    if( a.afford ){
+        v.reward.Features -= a.cost;
+        meta.spend++;
+        s.locked = st;
+    }
+    console.log( true )
+    undexButtons();
+}
+
+function buyFeature( f, grp ){
+    if( v.reward.Features == undefined ){ return }
+    let a = scalarAfford( grp, f );
+    console.log( grp, f )
+    let s = meta[grp].filter( e => e.id == f )[0];
+    if( a.afford && ( s.max == null || s.max > s.bought ) ){
+        v.reward.Features -= a.cost;
+        meta.spend++;
+        s.bought++;
+    }
+    undexButtons();
+}
+
+function scalarAfford( grp, f, st ){
+    if( st == undefined ){ st = null; }
+    let c = 0;
+    c += meta.laps;
+    c += meta.spend;
+    if( st == true ){
+        if( grp == `questDef` ){ c += pricing.questOff }
+        if( grp == `jerkTraits` ){ c += pricing.traitOff }
+        if( grp == `upgrades` ){ c += pricing.upgradePrice }
+    }
+    else if( st == false ){
+        if( grp == `questDef` ){ c += pricing.questOn }
+        if( grp == `jerkTraits` ){ c += pricing.traitOff }
+        if( grp == `upgrades` ){ c += pricing.upgradePrice }
+    }
+    else{
+        if( grp == `limits` ){ c += pricing.limitChange }
+        if( grp == `scale` ){ c += pricing.scaleChange }
+        if( grp == `newFeatures` ){ c += meta[grp][f].cost }
+    }
+    return { afford: v.reward.Features >= c, cost: c };
+}
+
+function undexButtons(){
+    let grps = [`questDef`,`jerkTraits`,`upgrades`,`limits`,`scale`,`newFeatures`]
+    for( g in grps ){
+        let e = document.querySelectorAll(`[data-feature-group="${grps[g]}"]`);
+        for( let i = 0; i < e.length; i++ ){
+            let a = scalarAfford( grps[g], e[i].getAttribute(`data-feature`), e[i].parentElement.children[0].checked );
+            if( !a.afford ){ e[i].classList.add(`unaffordable`); }
+        }
+    }
+    let fcosts = [`upgradePrice`,`limitChange`,`scaleChange`,`questOn`,`questOff`,`traitOn`,`traitOff`,`newUpgrade`,`newFeature`];
+    for( f in fcosts ){
+        let e = document.querySelectorAll(`[data-fcost="${fcosts[f]}"]`);
+        for( let i = 0; i < e.length; i++ ){
+            e[i].innerHTML = numDisplay( meta.laps + meta.spend + pricing[fcosts[f]] ) + `<div class="s9 inlineIcon"></div>`;
+        }
+    }
+    displayRewards();
+}
+
+function doItAllOverAgain(){
+    meta.laps++;
+    meta.spend = 0;
+    v.runs = [];
+    v.roster = [];
+    v.upgrades = {};
+    v.curr = { gained: 0, spent: 0 };
+    v.reward = {};
+    v.completed = {};
+    v.spent = {};
+    v.selected = null;
+    v.jerkSelected = null;
+    v.tab = null;
+    v.miniTab = null;
+    v.clickTimer = 10000;
+    v.watermark = 0;    
+    v.multi = 0;
+    v.recreates = 0;
+    extrapolateMeta();
+    saveState();
+    location.reload();
 }
 
 function resetData(){
@@ -945,182 +1200,45 @@ function resetData(){
     location.reload();
 }
 
-var v = {
-    version: 0.01
-    , runs: []
-    , roster: []
-    , upgrades: {}
-    , ms: { start: 0, last: 0 }
-    , curr: { gained: 0, spent: 0 }
-    , reward: {}
-    , completed: {}
-    , spent: {}
-    , selected: null
-    , jerkSelected: null
-    , tab: null
-    , miniTab: null
-    , clickTimer: 10000
-    , spawnChance: 1 / 5000
-    , watermark: 0    
-    , multi: 0
-    , recreates: 0
-}
-
-const global = {
-    scale: { buy: 1.1, buyScale: 1.0543046, cost: 2.5, add: 2, ranks: 10, span: 1.5, headStart: 1.1, autoBuyTier: 1.1 }
-    , tickSpeed: 50
-    , spanTarget: 5
-    , zeros: 1
-    , godMode: 1
-    , autoComplete: 120
-    , autoBuy: 10
-    , graceTicks: -10
-    , buyEvery: 1
-    , minRoster: 1
-    , scrollSpeed: 3
-    , recreateCost: 5
-    , recreateImproves: 0.8
-    , tierLimit: 9
-}
-
-const switches = {
-    display: true
-    , updateDisplay: true
-    , displayRewards: true
-    , tabUpdate: true
-}
-
-const upgrades = [
-    {   id: `maxZeros`,     scope: `global`,    cost: 1,    benefit: 1,     multi: 5,       nice: `Quantum Limit`,      tooltip: `Increase the max number of Quantum by 1` } //
-    , { id: `questTarget`,  scope: `global`,    cost: 5,    benefit: 1.05,  multi: 2,       nice: `Quest Targets`,      tooltip: `Reduce the targets of all Quests by 10%` } // consider making Span rather than Global
-    , { id: `clickSpawn`,   scope: `global`,    cost: 3,    benefit: 1.05,  multi: 2,       nice: `Clickables`,         tooltip: `Increase the spawn rate of clickables by 5%` } //
-    , { id: `skillTypes`,   scope: `global`,    cost: 3,    benefit: 1,     multi: 2.5,     nice: `Force Traits`,       tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } //
-    , { id: `recruitJerk`,  scope: `global`,    cost: 5,    benefit: 1,     multi: 1.75,    nice: `Create Force`,       tooltip: `Add one Cosmic Force to your roster` }  //
-    , { id: `startCash`,    scope: `span`,      cost: 5,    benefit: 2.5,   multi: 1.5,     nice: `Start Wealth`,       tooltip: `Double the amount of resource you start with` } //
-    , { id: `autoComplete`, scope: `span`,      cost: 10,   benefit: 1.1,   multi: 2,       nice: `Auto-Complete`,      tooltip: `Enable / Speed Up auto-completion by 20%` } //
-    , { id: `childReq`,     scope: `span`,      cost: 10,   benefit: 1,     multi: 2.5,     nice: `Children Required`,  tooltip: `Reduce the lower-level completions required by 1` } //
-    , { id: `rebirthSpan`,  scope: `span`,      cost: 1e3,  benefit: 1,     multi: 10,      nice: `Rebirth Layer`,      tooltip: `Reset all other upgrades back to 0 to gain a 5× Income boost and 25% faster automation` } //
-    , { id: `autoBuy`,      scope: `tier`,      cost: 5,    benefit: 1.1,   multi: 1.125,   nice: `Auto Buyer`,         tooltip: `Enable / Spped up auto-buying by 10%` } //
-    , { id: `scaleDelay`,   scope: `tier`,      cost: 5,    benefit: 1,     multi: 1.5,     nice: `Scale Delay`,        tooltip: `Delay the start of cost scaling by 1 (more)` } //
-    , { id: `creepReduce`,  scope: `tier`,      cost: 10,   benefit: 1.05,  multi: 2.5,     nice: `Cost Scaling`,       tooltip: `Reduce the amount by which costs scale by 5%` } //
-    , { id: `bulkBonus`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       nice: `Bulk Bonus`,         tooltip: `Increase output by 0.5% × total owned` } //
-    , { id: `headStart`,    scope: `tier`,      cost: 10,   benefit: 1.005, multi: 2,       nice: `Head Start`,         tooltip: `Start with 1 (more) Generator of this Tier owned` } //
-]
-
-const stat = [ { cost: 10, adds: 1 } ]
-
-const span = [
-      { curr: `Uncertainty`,    label: `Quantum`,       color: `#a07e36` }
-    , { curr: `Particles`,      label: `Partonic`,      color: `#97482c` }
-    , { curr: `Atoms`,          label: `Atomic`,        color: `#932929` }
-    , { curr: `Molecules`,      label: `Molecular`,     color: `#72285d` }
-    , { curr: `Organelles`,     label: `Organellar`,    color: `#33265b` }
-    , { curr: `Cells`,          label: `Cellular`,      color: `#2a3964` }
-    , { curr: `Organisms`,      label: `Organic`,       color: `#2c5478` }
-    , { curr: `Ideas`,          label: `Thought`,       color: `#3d6b68` }
-    , { curr: `&lt;&#47;&#62;`, label: `Code`,          color: `#385e35` }
-    , { curr: `Features`,       label: `Scalar`,        color: `#6f8240` }
-]
-
-const questDef = [
-      { basis: `gained`,    target: 1e7, verbiage: `Generate N Q` }
-    , { basis: `balance`,   target: 1e6, verbiage: `Hold N Q` }
-    , { basis: `cps`,       target: 1e4, verbiage: `Reach N Q Per Second` }
-    , { basis: `spent`,     target: 5e6, verbiage: `Spend N Q` }
-    , { basis: `own`,       target: 250, verbiage: `Own N ! Generators` }
-    , { basis: `buy1Gen`,   target: [{a:60,t:0},{a:55,t:1},{a:50,t:2},{a:45,t:3},{a:40,t:4},{a:35,t:5},{a:30,t:6},{a:25,t:7},{a:15,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators`}
-    , { basis: `buyNGen`,   target: [{a:50,t:1},{a:45,t:2},{a:40,t:3},{a:35,t:4},{a:30,t:5},{a:25,t:6},{a:20,t:7},{a:15,t:8},{a:5,t:9}], verbiage: `Buy N Tier I to $ Generators`}
-]
-
-const gen = [`Tier I`,`Tier II`,`Tier III`,`Tier IV`,`Tier V`,`Tier VI`,`Tier VII`,`Tier VIII`,`Tier IX`,`Tier X`];
-const gg = [`I`,`II`,`III`,`IV`,`V`,`VI`,`VII`,`VIII`,`IX`,`X`];
-const chance = [1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,7,7,7,7,8,8,8,9,9,10];
-
-const jerkTraits = [
-      { id: `fastOverall`,      significance: 0.05,  scope: `span`, verbiage: `All Tiers #% faster auto-buy` }
-    , { id: `overallDiscount`,  significance: 0.05,  scope: `span`, verbiage: `All Tiers #% discount on cost` }
-    , { id: `overallOutput`,    significance: 0.05,  scope: `span`, verbiage: `All Tiers #% more output` }
-    , { id: `fastBuy`,          significance: 0.075, scope: `tier`, verbiage: `#% faster @ auto-buy` }
-    , { id: `moreOutput`,       significance: 0.125, scope: `tier`, verbiage: `#% more output from @` }
-    , { id: `lessScale`,        significance: 0.075, scope: `tier`, verbiage: `#% slower cost scaling on @` }
-    , { id: `flatDiscount`,     significance: 0.075, scope: `tier`, verbiage: `#% discount on @ cost` }
-]
-
-class Quest{
-    constructor( d ){
-        let q = questDef[Math.floor( Math.random() * questDef.length )];
-        let w = Object.keys( span ).findIndex( (e) => e == d );
-        if( q.basis == `buy1Gen` ){
-            let n = Math.floor( Math.random() * q.target.length );
-            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.1, v.upgrades.questTarget ) );
-            this.tier = q.target[n].t;
-        }
-        else if( q.basis == `buyNGen` ){
-            let n = Math.floor( Math.random() * q.target.length );
-            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( 1.1, v.upgrades.questTarget ) );
-            this.tier = q.target[n].t;            
-        }
-        else{
-            this.target = Math.floor( q.target * Math.pow( global.scale.span, w ) ) / Math.pow( 1.1, v.upgrades.questTarget );
-        }
-        this.basis = q.basis;
-        this.progress = 0;
-        this.complete = false;
-        this.verbiage = q.verbiage;
-        this.commence = now();
+function extrapolateMeta(){
+    upgrades = [];
+    for( u in meta.upgrades ){
+        upgrades.push( meta.upgrades[u].p );
+        upgrades[upgrades.length-1].id = meta.upgrades[u].id;
+        upgrades[upgrades.length-1].locked = meta.upgrades[u].locked;
     }
-}
-
-class Run{
-    constructor( d ){
-        this.id = uuid();
-        this.span = d;
-        this.gen = [];
-        this.auto = {};
-        this.autoOverride = [];
-        for( let i = 0; i < global.scale.ranks; i++ ){            
-            this.gen.push( v.upgrades[d].headStart[i] );
-            if( v.upgrades[d].autoBuy[i] == 0 ){ this.auto[`t${i}`] = null; }
-            else{ this.auto[`t${i}`] = autoBuyTime( d, i ); }
-            this.autoOverride.push(false);
-        }
-        this.quest = new Quest( d );
-        let sw = 10 * Math.pow( 2, v.upgrades[d].startCash );
-        this.curr = { gained: sw, spent: 0, cps: 0 };
-        let w = Object.keys( span ).findIndex( (e) => e == d );        
-        if( v.watermark < w ){
-            v.watermark = w;
-            setIco(w);
-        }
+    questDef = [];
+    for( q in meta.questDef ){
+        questDef.push( meta.questDef[q].p );
+        questDef[questDef.length-1].basis = meta.questDef[q].basis;
+        questDef[questDef.length-1].locked = meta.questDef[q].locked;
     }
-}
-
-class Jerk{
-    constructor( id ){
-        let o = 0;
-        this.id = String.fromCharCode( 945 + v.roster.length );
-        let str = null;
-        if( id !== undefined ){
-            this.id = id;
-            if( Math.random() < global.recreateImproves ){ str = true; }
-            else{ str = false; }
-            o = v.roster.filter( e => e.id == id )[0].strength;
-        }
-        this.traitCount = traitCount();
-        let genTrait = generateTraits( this.traitCount, str, o );
-        this.trait = genTrait.trait;
-        this.strength = genTrait.strength;
-        this.assignment = null;
+    jerkTraits = [];
+    for( j in meta.jerkTraits ){
+        jerkTraits.push( meta.jerkTraits[j].p );
+        jerkTraits[jerkTraits.length-1].id = meta.jerkTraits[j].id;
+        jerkTraits[jerkTraits.length-1].locked = meta.jerkTraits[j].locked;
     }
+    for( l in meta.limits ){
+        let e = meta.limits[l].adjust.replace(`@`,meta.limits[l].default).replace(`#`,meta.limits[l].bought);
+        global[meta.limits[l].id] = eval( e );
+    }
+    for( s in meta.scale ){
+        let e = meta.scale[s].adjust.replace(`@`,meta.scale[s].default).replace(`#`,meta.scale[s].bought);
+        global.scale[meta.scale[s].id] = eval( e );
+    }
+    for( x in meta.newFeatures ){}
 }
 
 function generateTraits( count, str, old ){
     let brake = 0;
+    let arr = [];
+    for( i in jerkTraits ){ if( !jerkTraits[i].locked ){ arr.push(jerkTraits[i] ); } }
     while( true ){
         let strength = 0;
         let tr = [];
         for( let i = 0; i < count; i++ ){
-            let selection = shuffle(jerkTraits)[0];
+            let selection = shuffle(arr)[0];
             let nonce = shuffle( chance )[0];
             let amt = nonce * selection.significance;
             let t = Math.floor( Math.random() * stat.length );
@@ -1154,14 +1272,15 @@ function setIco( w ){
 }
 
 function buildStat(){
-    for( let i = 1; i < global.scale.ranks; i++ ){ stat.push( { cost: stat[i-1].cost * global.scale.cost * Math.pow( global.scale.buyScale, i - 1 ), adds: stat[i-1].adds * global.scale.add } ); }
-    for( i in stat ){ stat[i].cost = stat[i].cost.toFixed(0); }
+    for( let i = 1; i < global.ranks; i++ ){ stat.push( { cost: stat[i-1].cost * global.scale.cost * Math.pow( global.scale.buyScale, i - 1 ), adds: stat[i-1].adds * global.scale.add } ); }
+    for( i in stat ){ stat[i].cost = stat[i].cost.toFixed(0); if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
 }
 
 function buildUpgrades(){
     for( u in upgrades ){
         let up = upgrades[u].id;
-        if( upgrades[u].scope == `global` ){ if( v.upgrades[up] == undefined ){ v.upgrades[up] = 0; } }
+        if( upgrades[u].locked ){}
+        else if( upgrades[u].scope == `global` ){ if( v.upgrades[up] == undefined ){ v.upgrades[up] = 0; } }
         else{
             for( d in span ){
                 if( upgrades[u].scope == `span` ){
@@ -1216,10 +1335,18 @@ const helpful = [
     , `Assign a Cosmic Force to gain its benefit`
 
     , `59 6F 75 20 77 65 6E 74 20 74 6F 20 61 20 6C 6F 74 20 6F 66 20 74 72 6F 75 62 6C 65 20 74 6F 20 72 65 61 64 20 74 68 69 73 2E 2E 2E`
+    , `I'm not convinced that the person who made this game understands what the word "scalar" means...`
     , `Is this all building towards something?`
     , `Surely there's going to be a Prestige at some point...`
     , `Is this game suggesting that Particles just appear given enough Uncertainty?`
     , `Humorous messages will appear here... focussing on features at the sec`
+]
+
+const helpless = [
+    `Wait ... did I just build the game I've been playing this whole time?`
+    , `I'm So Meta Even This Acronym`
+    , `If thinking about thinking is called metacognition, what is thinking about metacognition called?`
+    , `Is the reward for finishing really just starting all over again with a minor change?`
 ]
 
 function addTestData(){
@@ -1233,10 +1360,9 @@ function addTestData(){
 TODO
 When adding AutoComplete, need to sweep and commence those runs
 
+Bought changes to limits and scale
 
-ENDGAME
-Build one Scalar to retire the whole run, and be presented with a menu of features to add, remove, or modify
-
+Totally New Features (make work and show costing)
 
 Uncertainty     None
 Particles       Higgs Boson
@@ -1250,3 +1376,15 @@ Code            Divided by zero
 Features        
 
 */
+
+const pricing = {
+    upgradePrice: 0
+    , limitChange: 1
+    , scaleChange: 2
+    , questOn: 1
+    , questOff: 2
+    , traitOn: 1
+    , traitOff: 2
+    , newUpgrade: 3
+    , newFeature: null
+}
