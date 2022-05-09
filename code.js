@@ -1027,6 +1027,9 @@ function dataFix(){
     for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
     if( v.abandonTime == undefined ){ v.abandonTime = []; }
     for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
+    meta.upgrades.filter( e => e.id == `headStart` )[0].multi = 1.125;
+    meta.upgrades.filter( e => e.id == `scaleSpan` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
+    meta.upgrades.filter( e => e.id == `scaleSpan` )[0].does = `-10%`;
 }
 
 function safetyOff(){
