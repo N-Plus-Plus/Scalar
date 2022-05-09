@@ -39,6 +39,7 @@ function clicked(e){
     if( c.contains(`abandon`) ){ recreateRun( v.selected ); }
     if( c.contains(`confirm`) ){ renderUndex(); }
     if( c.contains(`prestige`) ){ safetyOff(); }
+    if( c.contains(`refreshMe`) ){ location.reload(); }
     else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
     else if( c.contains(`tooltip`) ){
         t = t.parentElement;
@@ -795,7 +796,8 @@ function spawnClickMe(){
     for( key in v.reward ){ arr.push( span.findIndex( e => e.curr == key ) ); }
     if( arr.length > 0 ){
         let nonce = Math.floor( Math.min( arr.length - 1, Math.random() * arr.length * Math.pow( getBenefit(`clickTilting`), ( v.upgrades.clickTilting == undefined ? 0 : v.upgrades.clickTilting) ) ) );
-        let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,arr[nonce].curr]] );
+        console.log(arr[nonce].curr)
+        let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,span[nonce].curr]] );
         e.style.left = Math.floor( 2 + Math.random() * window.innerWidth / 16 ) - 4 + `rem`;
         e.style.top = Math.floor( 2 + Math.random() * window.innerHeight / 16 ) - 4 + `rem`;
         document.querySelector(`#header`).parentElement.appendChild( e );
@@ -1045,6 +1047,7 @@ function renderUndex(){
         pre.appendChild( elem( `preamble large`, `Let the feature creep begin.` ) );
         pre.appendChild( elem( `preamble`, `Every change you make below will increase <b>all</b> costs by 1 due to the added complexity in the Scalar code. Choose wisely.` ) );
         pre.appendChild( elem( `preamble`, `Once you've rebuilt the game anew (i.e. completed another lap), this inflation will reduce to +1 per lap thanks to refactoring.` ) );
+        pre.appendChild( elem( `preamble`, `If you want to revert back to your previous branch (i.e. re-enter your previous lap), click <a class="refreshMe">REVERT BUILD</a>.` ) );
     t.appendChild( pre );
     t.appendChild( elem( `featureHeading`, `Upgrades<div class="scalarCost"><div class="scalarLabel">Enable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div><div class="scalarLabel">Disable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div></div>` ) );
     let u2 = elem( `featureBox` );
