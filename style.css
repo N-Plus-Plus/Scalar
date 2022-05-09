@@ -144,7 +144,7 @@ circle.paused{ opacity: 0.25;}
 .preamble.large{ font-size: 1.5rem;}
 .featureHeading{ height: 2.5rem; width: 100%; font-size: 1.5rem; border-bottom: solid white 1px; padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 2rem; display: flex; justify-content: space-between;}
 .featureBox{ display: flex; flex-wrap: wrap; }
-.featureToggle{ display: flex; width: 15rem; height: 2.5rem; margin: 0 1rem 1rem 0; align-items: center; }
+.featureToggle{ display: flex; width: 15rem; height: 2.5rem; margin: 0 1rem 1rem 0; align-items: center; position: relative;}
 .toggle{ width: 3rem; height: 1.5rem; background-color: var(--dgrey); margin-right: 0.5rem; }
 .restart{ display: flex; align-items: center; justify-content: center; width: 16rem; background-color: #6f8240; height: 2rem; border: solid 1px white; color: var(--lgrey); cursor: pointer; margin: 2rem auto 0 auto; }
 .buyU{ display: flex; align-items: center; justify-content: center; width: 4.5rem; background-color: #6f8240; height: 2rem; border: solid 1px white; color: var(--lgrey); cursor: pointer; margin-right: 0.5rem; }

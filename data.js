@@ -113,6 +113,7 @@ var meta = {
         , { id: `specialJerks`, bought: 0, max: null, does: `+2.5%`, adjust: `1 - Math.pow( 0.025, # )`, nice: `Special Forces`, cost: 2 }
         , { id: `clickablePoints`, bought: 0, max: null, does: `+5%`, adjust: `1 - Math.pow( 0.05, # )`, nice: `Clickable Points`, cost: 1 }
         , { id: `pointTrickle`, bought: 0, max: null, does: `+1/min`, adjust: `# * ( global.tickSpeed / 1000 ) / 60`, nice: `Points Trickle`, cost: 2 }
+        , { id: `remainderCarryover`, bought: 0, max: null, does: null, adjust: ``, nice: `Keep Remainder`, cost: 2 }
         // boosts that appear from time to time
     ]
 }

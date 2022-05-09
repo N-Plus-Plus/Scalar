@@ -794,8 +794,8 @@ function spawnClickMe(){
     let arr = [];
     for( key in v.reward ){ arr.push( span.findIndex( e => e.curr == key ) ); }
     if( arr.length > 0 ){
-        let nonce = Math.floor( Math.min( arr.length - 1, Math.random() * arr.length * Math.pow( getBenefit(`clickTilting`), v.upgrades.clickTilting ) ) );
-        let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,span[nonce].curr]] );
+        let nonce = Math.floor( Math.min( arr.length - 1, Math.random() * arr.length * Math.pow( getBenefit(`clickTilting`), ( v.upgrades.clickTilting == undefined ? 0 : v.upgrades.clickTilting) ) ) );
+        let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,arr[nonce].curr]] );
         e.style.left = Math.floor( 2 + Math.random() * window.innerWidth / 16 ) - 4 + `rem`;
         e.style.top = Math.floor( 2 + Math.random() * window.innerHeight / 16 ) - 4 + `rem`;
         document.querySelector(`#header`).parentElement.appendChild( e );
@@ -1079,6 +1079,7 @@ function renderUndex(){
             let l3 = elem( `featureToggle` );
                 l3.appendChild( elem( `buyU`, meta.limits[i].does, [[`feature`,meta.limits[i].id],[`feature-group`,`limits`]] ) );
                 l3.appendChild( elem( `feature`, meta.limits[i].nice ) );
+                l3.innerHTML += `<span class="tooltip"><div class="bottom">${meta.limits[i].verbiage}<i></i></div></span>`
                 l2.appendChild( l3 );
         }
     t.appendChild( l2 );
@@ -1088,6 +1089,7 @@ function renderUndex(){
             let s3 = elem( `featureToggle` );
                 s3.appendChild( elem( `buyU`, meta.scale[i].does, [[`feature`,meta.scale[i].id],[`feature-group`,`scale`]] ) );
                 s3.appendChild( elem( `feature`, meta.scale[i].nice ) );
+                s3.innerHTML += `<span class="tooltip"><div class="bottom">${meta.scale[i].verbiage}<i></i></div></span>`
                 s2.appendChild( s3 );
         }
     t.appendChild( s2 );
