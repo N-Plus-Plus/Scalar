@@ -1117,14 +1117,12 @@ function toggleFeature( f, st, grp ){
         meta.spend++;
         s.locked = st;
     }
-    console.log( true )
     undexButtons();
 }
 
 function buyFeature( f, grp ){
     if( v.reward.Features == undefined ){ return }
     let a = scalarAfford( grp, f );
-    console.log( grp, f )
     let s = meta[grp].filter( e => e.id == f )[0];
     if( a.afford && ( s.max == null || s.max > s.bought ) ){
         v.reward.Features -= a.cost;
