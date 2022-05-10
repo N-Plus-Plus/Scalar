@@ -457,7 +457,9 @@ function selectTab( n, m ){
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
     buildTabContents( d, m );
-    document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`;
+    if( v.tab !== `points` ){
+        document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`;
+    }
 }
 
 function updateTabDisplay(){
