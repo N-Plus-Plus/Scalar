@@ -155,7 +155,12 @@ function progress(){
                     for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
                     v.runs[r].quest.progress = Math.min( 1, ta / tt );
                 break;
-            }            
+                case `buyXGen`:
+                    let xa = 0;
+                    for( let i = global.ranks - 1; i >= 0; i-- ){ if( v.runs[r].gen[i] > xa ){ xa = Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); } }
+                    v.runs[r].quest.progress = Math.min( 1, xa / Math.floor( v.runs[r].quest.target ) );
+                break;
+            }
             if( v.runs[r].quest.progress >= 1 ){
                 v.runs[r].quest.complete = true;
                 if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
@@ -1028,8 +1033,11 @@ function dataFix(){
     if( v.abandonTime == undefined ){ v.abandonTime = []; }
     for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
     meta.upgrades.filter( e => e.id == `headStart` )[0].multi = 1.125;
-    meta.upgrades.filter( e => e.id == `scaleSpan` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
-    meta.upgrades.filter( e => e.id == `scaleSpan` )[0].does = `-10%`;
+    meta.scale.filter( e => e.id == `span` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
+    meta.scale.filter( e => e.id == `span` )[0].does = `-10%`;
+    if( meta.questDef.filter( e => e.id == `buyXGen` ).length == 0 ){
+        meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
+    }
 }
 
 function safetyOff(){
