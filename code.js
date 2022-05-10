@@ -536,7 +536,7 @@ function buildTabContents( n, x ){
         populateTooltips();
         return;
     }
-    t.appendChild( elem( `upgradeHeading spanLabel`, `${span[v.tab].label} Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`, [[`name`,x]] ) );
+    t.appendChild( elem( `upgradeHeading spanLabel`, `General Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`, [[`name`,x]] ) );
     for( k in Object.keys( v.upgrades[n] ) ){
         let ch = Object.keys(v.upgrades[n])[k];
         let subj = upgrades.filter( (e) => e.id == ch )[0];
