@@ -456,7 +456,8 @@ function selectTab( n, m ){
     if( span[d] == undefined ){ color = `#656D78`; }
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
-    buildTabContents( d, m );    
+    buildTabContents( d, m );
+    document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`;
 }
 
 function updateTabDisplay(){
@@ -533,7 +534,7 @@ function buildTabContents( n, x ){
         populateTooltips();
         return;
     }
-    t.appendChild( elem( `upgradeHeading spanLabel`, `General Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
+    t.appendChild( elem( `upgradeHeading spanLabel`, `${span[v.tab].label} Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`, [[`name`,x]] ) );
     for( k in Object.keys( v.upgrades[n] ) ){
         let ch = Object.keys(v.upgrades[n])[k];
         let subj = upgrades.filter( (e) => e.id == ch )[0];
@@ -566,7 +567,7 @@ function buildTabContents( n, x ){
     t.appendChild( mt );
     t.appendChild( elem( `miniTabContents` ) );
     v.tab = n;
-    selectMiniTab( x, n );    
+    selectMiniTab( x, n );
 }
 
 function buildMiniTabContents( n, d ){
@@ -1028,16 +1029,16 @@ function download(state) {
   }
 
 function dataFix(){
-    if( v.fastest == undefined ){ v.fastest = []; }
-    for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
-    if( v.abandonTime == undefined ){ v.abandonTime = []; }
-    for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
-    meta.upgrades.filter( e => e.id == `headStart` )[0].multi = 1.125;
-    meta.scale.filter( e => e.id == `span` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
-    meta.scale.filter( e => e.id == `span` )[0].does = `-10%`;
-    if( meta.questDef.filter( e => e.id == `buyXGen` ).length == 0 ){
-        meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
-    }
+    // if( v.fastest == undefined ){ v.fastest = []; }
+    // for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
+    // if( v.abandonTime == undefined ){ v.abandonTime = []; }
+    // for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
+    // meta.upgrades.filter( e => e.id == `headStart` )[0].multi = 1.125;
+    // meta.scale.filter( e => e.id == `span` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
+    // meta.scale.filter( e => e.id == `span` )[0].does = `-10%`;
+    // if( meta.questDef.filter( e => e.id == `buyXGen` ).length == 0 ){
+    //     meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
+    // }
 }
 
 function safetyOff(){
