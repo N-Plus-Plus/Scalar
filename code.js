@@ -1042,6 +1042,7 @@ function dataFix(){
     // if( meta.questDef.filter( e => e.id == `buyXGen` ).length == 0 ){
     //     meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
     // }
+    if( meta.upgrades[1].multi == 2 ){ meta.upgrades[1].multi = 1.75; upgrades[1].multi = 1.75; }
 }
 
 function safetyOff(){
@@ -1380,6 +1381,7 @@ When adding AutoComplete, need to sweep and commence those runs
 Bought changes to limits and scale
 
 Totally New Features (make work and show costing)
+- - Clickable Timeout
 
 Uncertainty     None
 Particles       Higgs Boson
