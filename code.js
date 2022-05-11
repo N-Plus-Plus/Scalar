@@ -467,8 +467,10 @@ function updateTabDisplay(){
         for( i in upgrades ){
             if( upgrades[i].scope == `global` && !upgrades[i].locked ){
                 let id = upgrades[i].id;
-                document.querySelector(`[data-global-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[id] );
-                document.querySelector(`[data-global-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( null, id, null ) );
+                if( document.querySelector(`[data-span-bought="${id}"]`) !== null ){
+                    document.querySelector(`[data-global-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[id] );
+                    document.querySelector(`[data-global-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( null, id, null ) );
+                }
             }
         }
     }
@@ -830,6 +832,7 @@ function buyUpgrade( d, type, tier ){
             if( type == `rebirthSpan` ){ rebirth( d ); }
             else{ v.upgrades[d][type]++; }
             if( type == `abandonQuest` ){ switches.display = true; }
+            if( type == `autoComplete` ){ kickStart( d ); }
         }
         else{
             v.upgrades[d][type][tier]++;
@@ -962,6 +965,16 @@ function rebirth( s ){
     saveState();
 }
 
+function kickStart( d ){
+    for( r in v.runs ){ 
+        if( v.runs[r].span == d ){
+            if( v.runs[r].quest.complete == true ){
+                v.runs[r].completeIn = getAutoCompleteTime( d );
+            }
+        }
+    }
+}
+
 function adjustQuestTargets(){
     for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / getBenefit( `questTarget` ) ); }
     switches.display = true;
@@ -1043,6 +1056,7 @@ function dataFix(){
     //     meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
     // }
     if( meta.upgrades[1].multi == 2 ){ meta.upgrades[1].multi = 1.75; upgrades[1].multi = 1.75; }
+    if( v.reward.undefined == null ){ delete v.reward.undefined; }
 }
 
 function safetyOff(){
