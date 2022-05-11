@@ -39,6 +39,7 @@ function clicked(e){
     if( c.contains(`abandon`) ){ recreateRun( v.selected ); }
     if( c.contains(`confirm`) ){ renderUndex(); }
     if( c.contains(`prestige`) ){ safetyOff(); }
+    if( c.contains(`refreshMe`) ){ location.reload(); }
     else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
     else if( c.contains(`tooltip`) ){
         t = t.parentElement;
@@ -154,7 +155,12 @@ function progress(){
                     for( let i = ts; i >= 0; i-- ){ ta += Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); }
                     v.runs[r].quest.progress = Math.min( 1, ta / tt );
                 break;
-            }            
+                case `buyXGen`:
+                    let xa = 0;
+                    for( let i = global.ranks - 1; i >= 0; i-- ){ if( v.runs[r].gen[i] > xa ){ xa = Math.min( v.runs[r].gen[i], Math.floor( v.runs[r].quest.target ) ); } }
+                    v.runs[r].quest.progress = Math.min( 1, xa / Math.floor( v.runs[r].quest.target ) );
+                break;
+            }
             if( v.runs[r].quest.progress >= 1 ){
                 v.runs[r].quest.complete = true;
                 if( v.upgrades[v.runs[r].span].autoComplete > 0 ){
@@ -385,6 +391,8 @@ function displayRewards(){
         else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( v.reward[type])}</div>`}
     }
     t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`;
+    let u = document.querySelectorAll(`[data-curr]`);
+    for( let i = 0; i < u.length; i++ ){ u[i].innerHTML = numDisplay( v.reward[span[v.tab].curr] ) };
     switches.displayRewards = false;
 }
 
@@ -450,7 +458,8 @@ function selectTab( n, m ){
     if( span[d] == undefined ){ color = `#656D78`; }
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
-    buildTabContents( d, m );    
+    buildTabContents( d, m );
+    if( v.tab !== `points` ){ document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="currDisplay" data-curr="${v.tab}">${numDisplay( v.reward[span[v.tab].curr] )}</div>`; }
 }
 
 function updateTabDisplay(){
@@ -527,6 +536,7 @@ function buildTabContents( n, x ){
         populateTooltips();
         return;
     }
+    t.appendChild( elem( `upgradeTitle`, `General Upgrades`, [[`name`,x]] ) );
     t.appendChild( elem( `upgradeHeading spanLabel`, `General Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
     for( k in Object.keys( v.upgrades[n] ) ){
         let ch = Object.keys(v.upgrades[n])[k];
@@ -560,7 +570,7 @@ function buildTabContents( n, x ){
     t.appendChild( mt );
     t.appendChild( elem( `miniTabContents` ) );
     v.tab = n;
-    selectMiniTab( x, n );    
+    selectMiniTab( x, n );
 }
 
 function buildMiniTabContents( n, d ){
@@ -795,7 +805,7 @@ function spawnClickMe(){
     for( key in v.reward ){ arr.push( span.findIndex( e => e.curr == key ) ); }
     if( arr.length > 0 ){
         let nonce = Math.floor( Math.min( arr.length - 1, Math.random() * arr.length * Math.pow( getBenefit(`clickTilting`), ( v.upgrades.clickTilting == undefined ? 0 : v.upgrades.clickTilting) ) ) );
-        let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,arr[nonce].curr]] );
+        let e = elem( `clickMe s${arr[nonce]}`, ``, [[`click`,span[nonce].curr]] );
         e.style.left = Math.floor( 2 + Math.random() * window.innerWidth / 16 ) - 4 + `rem`;
         e.style.top = Math.floor( 2 + Math.random() * window.innerHeight / 16 ) - 4 + `rem`;
         document.querySelector(`#header`).parentElement.appendChild( e );
@@ -1022,10 +1032,17 @@ function download(state) {
   }
 
 function dataFix(){
-    if( v.fastest == undefined ){ v.fastest = []; }
-    for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
-    if( v.abandonTime == undefined ){ v.abandonTime = []; }
-    for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
+    // if( v.fastest == undefined ){ v.fastest = []; }
+    // for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
+    // if( v.abandonTime == undefined ){ v.abandonTime = []; }
+    // for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
+    // meta.upgrades.filter( e => e.id == `headStart` )[0].multi = 1.125;
+    // meta.scale.filter( e => e.id == `span` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
+    // meta.scale.filter( e => e.id == `span` )[0].does = `-10%`;
+    // if( meta.questDef.filter( e => e.id == `buyXGen` ).length == 0 ){
+    //     meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
+    // }
+    if( meta.upgrades[1].multi == 2 ){ meta.upgrades[1].multi = 1.75; upgrades[1].multi = 1.75; }
 }
 
 function safetyOff(){
@@ -1045,6 +1062,7 @@ function renderUndex(){
         pre.appendChild( elem( `preamble large`, `Let the feature creep begin.` ) );
         pre.appendChild( elem( `preamble`, `Every change you make below will increase <b>all</b> costs by 1 due to the added complexity in the Scalar code. Choose wisely.` ) );
         pre.appendChild( elem( `preamble`, `Once you've rebuilt the game anew (i.e. completed another lap), this inflation will reduce to +1 per lap thanks to refactoring.` ) );
+        pre.appendChild( elem( `preamble`, `If you want to revert back to your previous branch (i.e. re-enter your previous lap), click <a class="refreshMe">REVERT BUILD</a>.` ) );
     t.appendChild( pre );
     t.appendChild( elem( `featureHeading`, `Upgrades<div class="scalarCost"><div class="scalarLabel">Enable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div><div class="scalarLabel">Disable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div></div>` ) );
     let u2 = elem( `featureBox` );
@@ -1115,14 +1133,12 @@ function toggleFeature( f, st, grp ){
         meta.spend++;
         s.locked = st;
     }
-    console.log( true )
     undexButtons();
 }
 
 function buyFeature( f, grp ){
     if( v.reward.Features == undefined ){ return }
     let a = scalarAfford( grp, f );
-    console.log( grp, f )
     let s = meta[grp].filter( e => e.id == f )[0];
     if( a.afford && ( s.max == null || s.max > s.bought ) ){
         v.reward.Features -= a.cost;
@@ -1365,6 +1381,7 @@ When adding AutoComplete, need to sweep and commence those runs
 Bought changes to limits and scale
 
 Totally New Features (make work and show costing)
+- - Clickable Timeout
 
 Uncertainty     None
 Particles       Higgs Boson

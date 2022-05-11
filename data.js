@@ -52,7 +52,7 @@ var meta = {
     , spend: 0
     , upgrades: [
           { id: `maxZeros`,         locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 1, benefit: 1, multi: 5, nice: `Quantum Limit`, tooltip: `Increase the max number of Quantum by 1` } }
-        , { id: `questTarget`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 5, benefit: 1.1, multi: 2, nice: `Quest Targets`, tooltip: `Reduce the targets of all Quests by 10%` } }
+        , { id: `questTarget`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 5, benefit: 1.1, multi: 1.75, nice: `Quest Targets`, tooltip: `Reduce the targets of all Quests by 10%` } }
         , { id: `clickSpawn`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 3, benefit: 1.1, multi: 2, nice: `Clickables`, tooltip: `Increase the spawn rate of clickables by 5%` } }
         , { id: `skillTypes`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 3, benefit: 1, multi: 2.5, nice: `Force Traits`, tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } }
         , { id: `recruitJerk`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 2, benefit: 1, multi: 1.75, nice: `Create Force`, tooltip: `Add one Cosmic Force to your roster` } }
@@ -67,7 +67,7 @@ var meta = {
         , { id: `scaleDelay`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 5, benefit: 1, multi: 1.5, nice: `Scale Delay`, tooltip: `Delay the start of cost scaling by 1 (more)` } }
         , { id: `creepReduce`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.05, multi: 2.5, nice: `Cost Scaling`, tooltip: `Reduce the amount by which costs scale by 5%` } }
         , { id: `bulkBonus`,        locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.005, multi: 2, nice: `Bulk Bonus`, tooltip: `Increase output by 0.5% &#xD7; total owned` } }
-        , { id: `headStart`,        locked: true,   bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.005, multi: 2, nice: `Head Start`, tooltip: `Start with 1 (more) Generator of this Tier owned` } } ////
+        , { id: `headStart`,        locked: true,   bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.005, multi: 1.125, nice: `Head Start`, tooltip: `Start with 1 (more) Generator of this Tier owned` } } ////
     ]
     , questDef: [
           { basis: `gained`,        locked: false, nice: `Resource Earned`, p: { target: 1e7, verbiage: `Generate N Q` } }
@@ -78,6 +78,7 @@ var meta = {
         , { basis: `buy1Gen`,       locked: false, nice: `Buy 1 Tier Type`, p: { target: [{a:60,t:0},{a:55,t:1},{a:50,t:2},{a:45,t:3},{a:40,t:4},{a:35,t:5},{a:30,t:6},{a:25,t:7},{a:15,t:8},{a:10,t:9}], verbiage: `Buy N $ Generators` } }
         , { basis: `buyNGen`,       locked: false, nice: `Buy N Tier Types`, p: { target: [{a:50,t:1},{a:45,t:2},{a:40,t:3},{a:35,t:4},{a:30,t:5},{a:25,t:6},{a:20,t:7},{a:15,t:8},{a:5,t:9}], verbiage: `Buy N Tier I to $ Generators` } }
         , { basis: `spend`,         locked: true,  nice: `Single Purchase`, p: { target: 5e5, verbiage: `Spend N ! in one Purchase` } } ////
+        , { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } //
     ]
     , jerkTraits: [
           { id: `fastOverall`,      locked: false, nice: `Overall Buy Speed`, p: { significance: 0.05, scope: `span`, verbiage: `All Tiers #% faster auto-buy` } }
@@ -104,7 +105,7 @@ var meta = {
         , { id: `buyScale`, bought: 0, default: 1.0543046, max: null, nice: `Growth over Tiers`, adjust: `1+(@-1)*Math.pow(0.8,#)`, does:`-20%`, verbiage: `Amount of additional scale that successive Tiers base price receives.` }
         , { id: `add`, bought: 0, default: 2, max: null, nice: `Scale over Tiers`, adjust: `1+(@-1)/Math.pow(0.8,#)`, does:`+20%`, verbiage: `Amount of scale to earnings of each successive Tier of Generator.` }
         // , { id: `ranks`, bought: 0, default: 10, adjust: 1, verbiage: `Amount of Tiers of Generators to be available.` }
-        , { id: `span`, bought: 0, default: 1.5, max: null, nice: `Quest Target Multi`, adjust: `1+(@-1)*Math.pow(0.8,#)`, does:`-20%`, verbiage: `Amount of scale to Quest targets based on number of Layers from Quantum.` }
+        , { id: `span`, bought: 0, default: 1.5, max: null, nice: `Quest Target Multi`, adjust: `1+(@-1)*Math.pow(0.9,#)`, does:`-10%`, verbiage: `Amount of scale to Quest targets based on number of Layers from Quantum.` }
         , { id: `autoBuyTier`, bought: 0, default: 1.1, max: null, nice: `Auto-Buy Slowage`, adjust: `1+(@-1)/Math.pow(0.8,#)`, does:`-20%`, verbiage: `Scaled time increase of each Tier's Auto-Buy Upgrade purchased.` }
     ]
     , newFeatures: [
