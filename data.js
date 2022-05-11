@@ -52,7 +52,7 @@ var meta = {
     , spend: 0
     , upgrades: [
           { id: `maxZeros`,         locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 1, benefit: 1, multi: 5, nice: `Quantum Limit`, tooltip: `Increase the max number of Quantum by 1` } }
-        , { id: `questTarget`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 5, benefit: 1.1, multi: 2, nice: `Quest Targets`, tooltip: `Reduce the targets of all Quests by 10%` } }
+        , { id: `questTarget`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 5, benefit: 1.1, multi: 1.75, nice: `Quest Targets`, tooltip: `Reduce the targets of all Quests by 10%` } }
         , { id: `clickSpawn`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 3, benefit: 1.1, multi: 2, nice: `Clickables`, tooltip: `Increase the spawn rate of clickables by 5%` } }
         , { id: `skillTypes`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 3, benefit: 1, multi: 2.5, nice: `Force Traits`, tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } }
         , { id: `recruitJerk`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 2, benefit: 1, multi: 1.75, nice: `Create Force`, tooltip: `Add one Cosmic Force to your roster` } }
