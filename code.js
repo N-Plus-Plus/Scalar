@@ -391,6 +391,8 @@ function displayRewards(){
         else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( v.reward[type])}</div>`}
     }
     t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`;
+    let u = document.querySelectorAll(`[data-curr]`);
+    for( let i = 0; i < u.length; i++ ){ u[i].innerHTML = numDisplay( v.reward[span[v.tab].curr] ) };
     switches.displayRewards = false;
 }
 
@@ -457,9 +459,7 @@ function selectTab( n, m ){
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
     buildTabContents( d, m );
-    if( v.tab !== `points` ){
-        document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`;
-    }
+    if( v.tab !== `points` ){ document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="currDisplay" data-curr="${v.tab}">${numDisplay( v.reward[span[v.tab].curr] )}</div>`; }
 }
 
 function updateTabDisplay(){
@@ -536,7 +536,8 @@ function buildTabContents( n, x ){
         populateTooltips();
         return;
     }
-    t.appendChild( elem( `upgradeHeading spanLabel`, `General Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>`, [[`name`,x]] ) );
+    t.appendChild( elem( `upgradeTitle`, `General Upgrades`, [[`name`,x]] ) );
+    t.appendChild( elem( `upgradeHeading spanLabel`, `General Upgrades<div class="inlineHeadings"><div class="halfCell">Bought</div><div class="halfCell">Cost</div></div>` ) );
     for( k in Object.keys( v.upgrades[n] ) ){
         let ch = Object.keys(v.upgrades[n])[k];
         let subj = upgrades.filter( (e) => e.id == ch )[0];
