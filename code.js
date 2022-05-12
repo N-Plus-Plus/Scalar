@@ -262,7 +262,7 @@ function updateCPS( index ){
         cps += getCPS( index, i, false );
     }
     let tr = getTraits( v.runs[index].span );
-    for( a in tr ){ if( tr[a].id == `trickleIncome` ){ cps += tr[a].amt * 100; } }
+    for( a in tr ){ if( tr[a].id == `trickleIncome` ){ cps += tr[a].amt * 100 * ( 1 + meta.laps ); } }
     let speedBoost = 1;
     if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( v.fastest[v.runs[index].span] / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }
     v.runs[index].curr.cps = Math.floor( cps * speedBoost );
@@ -280,7 +280,7 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `moreOutput` && i == tr[a].t ){ o *= ( 1 + tr[a].amt ) }
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
-    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan );
+    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps );
 }
 
 function calcReward( index ){
@@ -1078,6 +1078,7 @@ function renderUndex(){
         pre.appendChild( elem( `preamble`, `Every change you make below will increase <b>all</b> costs by 1 due to the added complexity in the Scalar code. Choose wisely.` ) );
         pre.appendChild( elem( `preamble`, `Once you've rebuilt the game anew (i.e. completed another lap), this inflation will reduce to +1 per lap thanks to refactoring.` ) );
         pre.appendChild( elem( `preamble`, `If you want to revert back to your previous branch (i.e. re-enter your previous lap), click <a class="refreshMe">REVERT BUILD</a>.` ) );
+        pre.appendChild( elem( `preamble`, `Once you commit your changes and relaunch Scalar, you will receive a +100% base output bonus for each rebuild (lap) you've completed.` ) );
     t.appendChild( pre );
     t.appendChild( elem( `featureHeading`, `Upgrades<div class="scalarCost"><div class="scalarLabel">Enable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div><div class="scalarLabel">Disable Cost:</div><div class="scalarNum" data-fcost="upgradePrice"></div></div>` ) );
     let u2 = elem( `featureBox` );
@@ -1391,12 +1392,10 @@ function addTestData(){
 /*
 
 TODO
-When adding AutoComplete, need to sweep and commence those runs
-
 Bought changes to limits and scale
 
 Totally New Features (make work and show costing)
-- - Clickable Timeout
+- - Clickable Timeout (animation duration)
 
 Uncertainty     None
 Particles       Higgs Boson
