@@ -144,7 +144,8 @@ circle.paused{ opacity: 0.25;}
 .undex{ min-height: calc( 100% - 8rem ); max-height: calc( 100% - 8rem ); position: relative; overflow-y: auto; overflow-x:hidden; padding: 2rem;}
 .preamble{ margin-bottom: 1rem;}
 .preamble.large{ font-size: 1.5rem;}
-.featureHeading{ height: 2.5rem; width: 100%; font-size: 1.5rem; border-bottom: solid white 1px; padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 2rem; display: flex; justify-content: space-between;}
+.feature{position: relative; display: flex; align-items: center;}
+.featureHeading{ height: 2.5rem; width: 100%; font-size: 1.5rem; border-bottom: solid white 1px; padding-bottom: 0.5rem; margin-bottom: 1rem; margin-top: 2rem; display: flex; justify-content: space-between; }
 .featureBox{ display: flex; flex-wrap: wrap; }
 .featureToggle{ display: flex; width: 15rem; height: 2.5rem; margin: 0 1rem 1rem 0; align-items: center; position: relative;}
 .toggle{ width: 3rem; height: 1.5rem; background-color: var(--dgrey); margin-right: 0.5rem; }

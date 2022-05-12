@@ -1110,8 +1110,8 @@ function renderUndex(){
         for( i in meta.limits ){
             let l3 = elem( `featureToggle` );
                 l3.appendChild( elem( `buyU`, meta.limits[i].does, [[`feature`,meta.limits[i].id],[`feature-group`,`limits`]] ) );
-                l3.appendChild( elem( `feature`, meta.limits[i].nice ) );
-                l3.innerHTML += `<span class="tooltip"><div class="bottom">${meta.limits[i].verbiage}<i></i></div></span>`
+                l3.appendChild( elem( `feature`, `<div>${meta.limits[i].nice}</div>` ) );
+                l3.lastChild.innerHTML += `<span class="tooltip"><div class="bottom">${meta.limits[i].verbiage}<i></i></div></span>`
                 l2.appendChild( l3 );
         }
     t.appendChild( l2 );
@@ -1120,8 +1120,8 @@ function renderUndex(){
         for( i in meta.scale ){
             let s3 = elem( `featureToggle` );
                 s3.appendChild( elem( `buyU`, meta.scale[i].does, [[`feature`,meta.scale[i].id],[`feature-group`,`scale`]] ) );
-                s3.appendChild( elem( `feature`, meta.scale[i].nice ) );
-                s3.innerHTML += `<span class="tooltip"><div class="bottom">${meta.scale[i].verbiage}<i></i></div></span>`
+                s3.appendChild( elem( `feature`, `<div>${meta.scale[i].nice}</div>` ) );
+                s3.lastChild.innerHTML += `<span class="tooltip"><div class="bottom">${meta.scale[i].verbiage}<i></i></div></span>`
                 s2.appendChild( s3 );
         }
     t.appendChild( s2 );
