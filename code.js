@@ -1057,6 +1057,7 @@ function dataFix(){
     // }
     if( meta.upgrades[1].multi == 2 ){ meta.upgrades[1].multi = 1.75; upgrades[1].multi = 1.75; }
     if( v.reward.undefined == null ){ delete v.reward.undefined; }
+    for( i in v.reward ){ if( v.reward[i] == null ){ delete v.reward[i]; } }
 }
 
 function safetyOff(){
