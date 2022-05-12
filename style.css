@@ -59,7 +59,7 @@ section{ max-height: calc( 100% - 7rem ); overflow-y: auto; overflow-x: hidden; 
 .abandon{ display: flex; align-items: center; justify-content: center; background-color: var(--invis); height: 2rem; width: 7.5rem; border: solid 1px white; color: var(--lgrey); position: absolute; top: 0; right: 0; }
 .statRow{ height: 2.5rem; }
 .questBox{ display: flex; align-items: center; justify-content: center; width: 100%; margin: 0 0 1rem 0; }
-.questBar{ height: 3.5rem; width: calc( 100% + 2rem ); background-color: #0009; padding: 0.5rem; position: relative; margin: -1rem -1rem 0 -1rem; z-index: 0; }
+.questBar{ height: 3.5rem; width: calc( 100% + 2rem ); background-color: #0009; padding: 0.5rem; position: relative; margin: -0.75rem -1rem 0 -1rem; z-index: 0; }
 .completing{ height: 3.5rem; max-width: calc( 100% - 2px ); width: 0%; background-color: var(--lgrey); position: absolute; top:0; left: 0; z-index: 1; }
 .barFillBox{ height: 3.5rem; width: calc( 100% - 2px ); z-index: 5; position: absolute; padding: 0.5rem; top: 0; left: 0; }
 .barFill{ background-color: var(--span); height: 2.5rem; width: 0%; }
