@@ -265,7 +265,7 @@ function updateCPS( index ){
     for( a in tr ){ if( tr[a].id == `trickleIncome` ){ cps += tr[a].amt * 100; } }
     let speedBoost = 1;
     if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( v.fastest[v.runs[index].span] / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }
-    v.runs[index].curr.cps = Math.floor( cps );
+    v.runs[index].curr.cps = Math.floor( cps * speedBoost );
 }
 
 function getCPS( index, i ){
@@ -1422,3 +1422,26 @@ const pricing = {
     , newUpgrade: 3
     , newFeature: null
 }
+
+const referrals = [
+      { name: `Universal Paperclips`, url: `https://www.decisionproblem.com/paperclips/index2.html`, visited: 0 }
+    , { name: `More Ore`, url: `https://syns.studio/more-ore/`, visited: 0 }
+    , { name: `Evolve`, url: `https://pmotschmann.github.io/Evolve/`, visited: -1 }
+    , { name: `Synergism`, url: `https://pseudo-corp.github.io/SynergismOfficial/`, visited: 0 }
+    , { name: `Progress Knight`, url: `https://ihtasham42.github.io/progress-knight/`, visited: 0 }
+    , { name: `Calculator Evolution`, url: `https://spotky1004.com/Calculator-Evolution/`, visited: 0 }
+    , { name: `A Dark Room`, url: `https://adarkroom.doublespeakgames.com/`, visited: 0 }
+    , { name: `Sushi Beans`, url: `https://sushibeans.glitch.me/`, visited: 0 }
+    , { name: `Crank`, url: `https://faedine.com/games/crank/b39/`, visited: 0 }
+    , { name: `Idle Dice`, url: `https://luts91.github.io/idle-dices/`, visited: 0 }
+    , { name: `Spirit Dungeons`, url: `https://spiritdungeons.com/legacy`, visited: 0 }
+    , { name: `Pachinkremental`, url: `https://poochyexe.github.io/pachinkremental/pachinkremental.html`, visited: 0 }
+    , { name: `Cookie Clicker`, url: `https://orteil.dashnet.org/cookieclicker/`, visited: 0 }
+    , { name: `Incremancer`, url: `https://incremancer.gti.nz/`, visited: 0 }
+    , { name: `Creature Card Idle`, url: `https://store.steampowered.com/app/1188260/Creature_Card_Idle/`, visited: 0 }
+    , { name: `Antimatter Dimensions`, url: `https://ivark.github.io/`, visited: 0 }
+    , { name: `Chime Clicker`, url: `http://chimeclicker.lol.s3-website-us-east-1.amazonaws.com/`, visited: 0 }
+    , { name: `Space Plan`, url: `http://spaceplan.click/`, visited: 0 }
+    , { name: ``, url: ``, visited: 0 }
+    , { name: ``, url: ``, visited: 0 }
+]
