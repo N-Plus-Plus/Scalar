@@ -236,7 +236,7 @@ function cost( index, g ){
 
 function uCost( span, g ){
     let n = v.upgrades[span].headStart[g];
-    return Math.pow( global.scale.buy, n ) * stat[g].cost;
+    return Math.ceil( Math.pow( global.scale.buy, n ) * stat[g].cost );
 }
 
 function getBenefit( up ){
