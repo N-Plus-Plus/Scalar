@@ -263,9 +263,7 @@ function updateCPS( index ){
     }
     let tr = getTraits( v.runs[index].span );
     for( a in tr ){ if( tr[a].id == `trickleIncome` ){ cps += tr[a].amt * 100 * ( 1 + meta.laps ); } }
-    let speedBoost = 1;
-    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( v.fastest[v.runs[index].span] / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }
-    v.runs[index].curr.cps = Math.floor( cps * speedBoost );
+    v.runs[index].curr.cps = Math.floor( cps );
 }
 
 function getCPS( index, i ){
@@ -280,7 +278,9 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `moreOutput` && i == tr[a].t ){ o *= ( 1 + tr[a].amt ) }
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
-    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps );
+    let speedBoost = 1;
+    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }    
+    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps ) * speedBoost;
 }
 
 function calcReward( index ){
@@ -467,10 +467,8 @@ function updateTabDisplay(){
         for( i in upgrades ){
             if( upgrades[i].scope == `global` && !upgrades[i].locked ){
                 let id = upgrades[i].id;
-                if( document.querySelector(`[data-span-bought="${id}"]`) !== null ){
-                    document.querySelector(`[data-global-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[id] );
-                    document.querySelector(`[data-global-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( null, id, null ) );
-                }
+                document.querySelector(`[data-global-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[id] );
+                document.querySelector(`[data-global-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( null, id, null ) );
             }
         }
     }
@@ -1224,9 +1222,47 @@ function doItAllOverAgain(){
     v.watermark = 0;    
     v.multi = 0;
     v.recreates = 0;
+    v.fastest = [];
     extrapolateMeta();
     saveState();
     location.reload();
+}
+
+function reward( x ){
+    switch( x ){
+        case `clickMe`:
+            for( let i = 0; i < 100; i++ ){ spawnClickMe(); } // 100 clickables
+        break;
+        case `points`:
+            v.curr.gained += Math.ceil( ( v.curr.gained - v.curr.spent ) * 0.05 ); // 5% points boost
+            switches.displayRewards = true;
+        break;
+        case `reward`:
+            for( i in v.reward ){ v.reward[i] = Math.ceil( v.reward[i] * 0.05  ); }; // +5% all Reward
+            switches.displayRewards = true;
+        break;
+        case `doubleTime`:
+            // double time for n ticks
+        break;
+        case `freeUpgrade`:
+            // next Upgrade costs 0
+        break;
+        case `10mins`:
+            // ten minutes of progress gain
+        break;
+        case `60mins`:
+            // sixty minutes of progress gain
+        break;
+        case ``:
+            // HERE
+        break;
+        case ``:
+            // 
+        break;
+        case `moreSpins`:
+            // 2 more spins
+        break;
+    }
 }
 
 function resetData(){
@@ -1392,7 +1428,7 @@ function addTestData(){
 /*
 
 TODO
-Bought changes to limits and scale
+Buying Global Upgrades doesn't update Bought or Cost ...
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
