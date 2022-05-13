@@ -967,7 +967,9 @@ function kickStart( d ){
     for( r in v.runs ){ 
         if( v.runs[r].span == d ){
             if( v.runs[r].quest.complete == true ){
-                v.runs[r].completeIn = getAutoCompleteTime( d );
+                let t = getAutoCompleteTime( d );
+                if( v.runs[r].completeIn == undefined ){ v.runs[r].completeIn = t; }
+                else if( v.runs[r].completeIn > t ){ v.runs[r].completeIn = t; }                
             }
         }
     }
@@ -1420,7 +1422,8 @@ const helpless = [
 ]
 
 function addTestData(){
-    for( let i = 0; i < 9; i++ ){
+    for( let i = 0; i < 10; i++ ){
+        v.reward[span[i].curr] = 999;
         v.runs.push( new Run( i ) );
     }
 }
@@ -1429,6 +1432,9 @@ function addTestData(){
 
 TODO
 Buying Global Upgrades doesn't update Bought or Cost ...
+Unlocking a new tab deselects all tabs...
+Make the cursor into a force when assigning mode is live
+
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
