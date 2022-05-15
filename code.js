@@ -361,7 +361,15 @@ function offlineSnapshot(){
     v.snaps.splice( 60, 1 );
 }
 
-function offlineProgress( ms, n ){
+function offlineProgress( ms ){
+    let mins = Math.ceil( ms / 1000 / 60 );
+    let multi = 1;
+    let l = v.snaps.length;
+    if( l < mins ){ multi = mins / l; mins = v.snaps.length; }
+    let d = {}
+    for( i in v.snaps[l-1] ){ if( v.snaps[l-mins][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } }
+    v.curr.gained += d.points;
+    for( r in v.reward ){ v.reward[r].gained += d[r] }
     return;
     if( n !== undefined ){ ms = n * 60 * 1000; }
     let ticks = Math.floor( ms / global.tickSpeed );
@@ -1420,11 +1428,11 @@ function reward( x ){
             v.bonus.push( { type: ``, disp: `Your next Upgrade (of any kind) is free!`, remaining: -1 } );
         break;
         case `15mins`:
-            offlineProgress( 0, 15 );// fifteen minutes of progress gain
+            offlineProgress( 15 * 60 * 1000 );// fifteen minutes of progress gain
             v.bonus.push( { type: ``, disp: `15 minutes of idle progress added!`, remaining: -1 } );
         break;
         case `60mins`:
-            offlineProgress( 0, 60 ); // sixty minutes of progress gain
+            offlineProgress( 60 * 60 * 1000 ); // sixty minutes of progress gain
             v.bonus.push( { type: ``, disp: `60 minutes of idle progress added!`, remaining: -1 } );
         break;
         case `output`:
