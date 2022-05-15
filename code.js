@@ -1161,6 +1161,7 @@ function loadState(){
     let elapsed = now() - v.ms.last;
     if( elapsed > global.offlineGrace ){ offlineProgress( elapsed ); }
     if( elapsed > 1 / global.giftChance ){ v.giftDue = true; }
+    else if( Math.random() < global.giftChance * ( elapsed / global.tickSpeed ) ){ v.giftDue = true; }
 }
 
 function exportState(){
