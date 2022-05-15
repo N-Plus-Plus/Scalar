@@ -205,9 +205,9 @@ function progress(){
     displayProgress();
 }
 
-function getAutoCompleteTime( r ){
+function getAutoCompleteTime( r, s ){
     let raw = global.autoComplete * ( 1000 / global.tickSpeed );
-    let s = v.runs[r].span;
+    if( s == undefined ){ s = v.runs[r].span; }
     let b = 0;
     for( i in v.bonus ){ if( v.bonus[i].type == `fastAuto` ){ b++; } };
     return Math.ceil( raw * Math.pow( 0.8, v.upgrades[s].autoComplete - 1 ) ) * Math.pow( 0.75, v.upgrades[s].rebirthSpan ) / Math.pow( 2, b );
@@ -1100,9 +1100,9 @@ function kickStart( d ){
     for( r in v.runs ){ 
         if( v.runs[r].span == d ){
             if( v.runs[r].quest.complete == true ){
-                let t = getAutoCompleteTime( d );
+                let t = getAutoCompleteTime( d, d );
                 if( v.runs[r].completeIn == undefined ){ v.runs[r].completeIn = t; }
-                else if( v.runs[r].completeIn > t ){ v.runs[r].completeIn = t; }                
+                else if( v.runs[r].completeIn > t ){ v.runs[r].completeIn = t; }
             }
         }
     }
