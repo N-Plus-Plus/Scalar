@@ -373,7 +373,6 @@ function offlineProgress( ms, n ){
             v.completed[arr[a-1]] -= amt * v.upgrades[arr[a]].childReq;
             v.reward[span[arr[a]].curr] += Math.floor( ms / ( getOffline(arr[a]).dur / amt ) * getOffline(arr[a]).gain );
             v.curr.gained += amt;
-            console.log(ticks, o.dur, limit, ticks / o.dur / limit, c, amt)
             if( amt > limit ){ recreateAllRuns( arr[a] ); }
         }
     }
@@ -1091,6 +1090,7 @@ function rebirth( s ){
     delete v.upgrades[s];
     buildUpgrades();
     v.upgrades[s].rebirthSpan = parseInt( n ) + 1;
+    v.offline[s] = [];
     display( v.selected );
     selectTab( v.tab, v.miniTab );
     saveState();
@@ -1377,7 +1377,6 @@ function prepOffline(){
 }
 
 function reward( x ){
-    console.log(x);
     switch( x ){
         case `clickMe`:
             for( let i = 0; i < 100; i++ ){ spawnClickMe(); } // 100 clickables
