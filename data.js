@@ -21,6 +21,7 @@ var v = {
     , giftDue: true
     , spins: 0
     , offline: {}
+    , snaps: []
 }
 
 const global = {
@@ -44,7 +45,7 @@ const global = {
     , abandonTimer: 300
     , bonusTime: 300
     , offlineGrace: 2e4
-    , giftChance: 1 / 2.5e4
+    , giftChance: 1 / 2.5e4 // 1 / 2.5e5 ?
     , spinTimer: 5000
 }
 

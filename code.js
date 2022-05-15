@@ -79,6 +79,7 @@ function doLoop( tick ){
         if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
         if( Math.random() < global.giftChance ){ if( v.spins >= 0 ){ v.giftDue = true; } else{ v.spins = 0; } }
         if( tick % 50 == 0 ){ saveState(); }
+        if( tick % 1200 == 0 ){ offlineSnapshot(); }
         v.ms.last = tick;
         if( switches.display ){ display( v.selected); }
         if( switches.updateDisplay ){ updateDisplay(); }
@@ -270,7 +271,10 @@ function completeBalance( k ){
     if( v.completed[k] == undefined ){ return 0; }
     if( v.spent[k] == undefined ){ return v.completed[k]; }
     return v.completed[k] - v.spent[k];
+}
 
+function netReward( c ){
+    return v.reward[c].gained - v.reward[c].spent;
 }
 
 function updateCPS( index ){
@@ -296,7 +300,7 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
     let speedBoost = 1;
-    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / ( 25 / v.upgrades[v.runs[index].span].speedBonus ) ); }
+    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += v.upgrades[v.runs[index].span].speedBonus / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / 25 ); }
     let b = 0;
     if( v.bonus.length > 0 ){
         for( i in v.bonus ){ if( v.bonus[i].type == `output` ){ b++; }; }
@@ -315,8 +319,8 @@ function complete( ind, auto ){
     let d = parseFloat( JSON.parse( JSON.stringify( v.runs[ind].span ) ) );
     let time = parseInt( JSON.parse( JSON.stringify( now() - v.runs[ind].quest.commence ) ) );
     if( time < v.fastest[d] || v.fastest[d] == 0 ){ v.fastest[d] = time; }
-    if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = 0; }
-    v.reward[span[d].curr] += calcReward( ind );
+    if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = { gained: 0, spent: 0 }; }
+    v.reward[span[d].curr].gained += calcReward( ind );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
     v.curr.gained++;
@@ -350,7 +354,15 @@ function getOffline( ind ){
     return o;
 }
 
+function offlineSnapshot(){
+    let obj = { time: now(), points: v.curr.gained }
+    for( i in v.reward ){ obj[i] = v.reward[i].gained; }
+    v.snaps.push( obj );
+    v.snaps.splice( 60, 1 );
+}
+
 function offlineProgress( ms, n ){
+    return;
     if( n !== undefined ){ ms = n * 60 * 1000; }
     let ticks = Math.floor( ms / global.tickSpeed );
     let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
@@ -418,7 +430,7 @@ function topUpZeros(){
 }
 
 function clickReward( type, t ){
-    v.reward[type]++;
+    v.reward[type].gained++;
     t.parentElement.removeChild(t);
     switches.tabUpdate = true;
     switches.displayRewards = true;
@@ -456,12 +468,12 @@ function displayRewards(){
     for( key in span ){
         let type = span[key].curr;
         if( v.reward[type] == undefined ){}
-        else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( v.reward[type])}</div>`}
+        else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( netReward( type ) )}</div>`}
     }
     if( v.giftDue ){ t.innerHTML += `<div class="rewardBox"><div class="gift"></div><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
     else{ t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
     let u = document.querySelectorAll(`[data-curr]`);
-    for( let i = 0; i < u.length; i++ ){ u[i].innerHTML = numDisplay( v.reward[span[v.tab].curr] ) };
+    for( let i = 0; i < u.length; i++ ){ u[i].innerHTML = numDisplay( netReward( span[v.tab].curr ) ) };
     switches.displayRewards = false;
 }
 
@@ -528,7 +540,7 @@ function selectTab( n, m ){
     else{ color = span[d].color; }
     document.documentElement.style.setProperty('--tab', color );
     buildTabContents( d, m );
-    if( v.tab !== `points` ){ document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="currDisplay" data-curr="${v.tab}">${numDisplay( v.reward[span[v.tab].curr] )}</div>`; }
+    if( v.tab !== `points` ){ document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="currDisplay" data-curr="${v.tab}">${numDisplay( netReward( span[v.tab].curr ) )}</div>`; }
 }
 
 function updateTabDisplay(){
@@ -545,16 +557,17 @@ function updateTabDisplay(){
         let s = v.tab;
         let m = v.miniTab;
         for( i in upgrades ){
+            let id = upgrades[i].id;
             if( upgrades[i].scope == `span` && !upgrades[i].locked ){
-                let id = upgrades[i].id;
-                if( document.querySelector(`[data-span-bought="${id}"]`) !== null ){
+                if( document.querySelector(`[data-span-bought="${id}"]`) == null ){}
+                else{
                     document.querySelector(`[data-span-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id] );
                     document.querySelector(`[data-span-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, null ) );
                 }
             }
             if( upgrades[i].scope == `tier` && !upgrades[i].locked ){
-                let id = upgrades[i].id;
-                if( document.querySelector(`[data-tier-bought="${id}"]`) !== null ){
+                if( document.querySelector(`[data-span-bought="${id}"]`) == null ){}
+                else{
                     document.querySelector(`[data-tier-bought="${id}"]`).innerHTML = numDisplay( v.upgrades[s][id][m] );
                     document.querySelector(`[data-tier-cost="${id}"]`).innerHTML = numDisplay( upgradeCost( s, id, m ) );
                 }
@@ -900,7 +913,7 @@ function spawnClickMe(){
 function buyUpgrade( d, type, tier ){
     if( upgradeAfford( d, type, tier ) ){
         if( type == `childReq` && global.spanTarget + Object.keys(span).findIndex( e => e == d ) - v.upgrades[d].childReq <= 1 ){ return }
-        if( d !== null ){ v.reward[span[d].curr] -= upgradeCost( d, type, tier ); }
+        if( d !== null ){ v.reward[span[d].curr].spent += upgradeCost( d, type, tier ); }
         else{ v.curr.spent += upgradeCost( d, type, tier ); }
         if( d == null ){
             v.upgrades[type]++;
@@ -912,6 +925,7 @@ function buyUpgrade( d, type, tier ){
             if( type == `rebirthSpan` ){ rebirth( d ); }
             else{ v.upgrades[d][type]++; }
             if( type == `abandonQuest` ){ switches.display = true; }
+            if( type == `speedBonus` ){ switches.display = true; }
             if( type == `autoComplete` ){ kickStart( d ); }
         }
         else{
@@ -938,7 +952,7 @@ function upgradeAfford( d, type, tier ){
 }
 
 function upgradeBalance( c ){
-    return v.reward[c];
+    return netReward( c );
 }
 
 function upgradeCost( d, type, tier ){
@@ -1187,13 +1201,19 @@ function download(state) {
 function dataFix(){
     if( meta.upgrades[1].multi == 2 ){ meta.upgrades[1].multi = 1.75; upgrades[1].multi = 1.75; }
     if( v.reward.undefined == null ){ delete v.reward.undefined; }
-    for( i in v.reward ){ if( v.reward[i] == null ){ delete v.reward[i]; } else{ v.reward[i] = Math.ceil( v.reward[i] ); } }
+    // for( i in v.reward ){ if( v.reward[i] == null ){ delete v.reward[i]; } else{ v.reward[i] = Math.ceil( v.reward[i] ); } }
     if( v.bonus == undefined ){ v.bonus = []; }
     if( v.nextOneFree == undefined ){ v.nextOneFree = false; }
     if( v.spins == undefined ){ v.spins = 0; }
     if( v.offline == undefined ){ v.offline = {}; prepOffline(); }
     if( v.removeDoubleCount !== undefined ){ delete v.removeDoubleCount; }
     if( v.giftDue == undefined ){ v.giftDue = true; }
+    if( v.snaps == undefined ){ v.snaps = []; }
+    if( v.reward.Uncertainty != undefined ){
+        if( v.reward.Uncertainty.gained == undefined ){
+            for( r in v.reward ){ let x = JSON.parse( JSON.stringify( v.reward[r] ) ); v.reward[r] = { gained: x, spent: 0 }; };
+        }
+    }
 }
 
 function safetyOff(){
@@ -1281,7 +1301,7 @@ function toggleFeature( f, st, grp ){
     let a = scalarAfford( grp, f, st );
     let s = meta[grp].filter( e => e.id == f || e.basis == f )[0];
     if( a.afford ){
-        v.reward.Features -= a.cost;
+        v.reward.Features.spent += a.cost;
         meta.spend++;
         s.locked = st;
     }
@@ -1293,7 +1313,7 @@ function buyFeature( f, grp ){
     let a = scalarAfford( grp, f );
     let s = meta[grp].filter( e => e.id == f )[0];
     if( a.afford && ( s.max == null || s.max > s.bought ) ){
-        v.reward.Features -= a.cost;
+        v.reward.Features.spent += a.cost;
         meta.spend++;
         s.bought++;
     }
@@ -1320,7 +1340,7 @@ function scalarAfford( grp, f, st ){
         if( grp == `scale` ){ c += pricing.scaleChange }
         if( grp == `newFeatures` ){ c += meta[grp][f].cost }
     }
-    return { afford: v.reward.Features >= c, cost: c };
+    return { afford: netReward( `Features` ) >= c, cost: c };
 }
 
 function undexButtons(){
@@ -1388,7 +1408,7 @@ function reward( x ){
             v.bonus.push( { type: ``, disp: `+10% to your <div class="inlineIcon points"></div> holdings!`, remaining: -1 } );
         break;
         case `reward`:
-            for( i in v.reward ){ v.reward[i] = Math.ceil( v.reward[i] * 1.2  ); }; // +20% all Reward
+            for( i in v.reward ){ v.reward[i].gained += Math.ceil( netReward( i ) * 0.2  ); }; // +20% all Reward
             v.bonus.push( { type: ``, disp: `+20% to ALL of your reward currencies!`, remaining: -1 } );
             switches.displayRewards = true;
         break;
@@ -1579,7 +1599,7 @@ const helpless = [
 
 function addTestData(){
     for( let i = 0; i < 10; i++ ){
-        v.reward[span[i].curr] = 999;
+        v.reward[span[i].curr].gained = 999;
         v.runs.push( new Run( i ) );
     }
 }
