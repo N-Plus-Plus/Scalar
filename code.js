@@ -350,8 +350,10 @@ function getOffline( ind ){
     return o;
 }
 
-function offlineProgress( ms ){
+function offlineProgress( ms, n ){
     let ticks = Math.floor( ms / global.tickSpeed );
+    if( n == undefined ){ n = 0; }
+    else{ n = ticks / 6e4; }
     let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
     for( a in arr ){
         if( v.completed[arr[a]] == undefined ){ break; }
@@ -370,7 +372,7 @@ function offlineProgress( ms ){
             let amt = Math.floor( Math.min( c, v.completed[arr[a-1]] / v.upgrades[arr[a]].childReq ) );
             v.completed[arr[a]] += amt;
             v.completed[arr[a-1]] -= amt * v.upgrades[arr[a]].childReq;
-            v.reward[span[arr[a]].curr] += Math.floor( c * o.dur );
+            v.reward[span[arr[a]].curr] += Math.floor( ( n * 60000 ) / getOffline(arr[a]).dur * 3 * getOffline(arr[a]).gain );
             v.curr.gained += amt;
             if( amt > limit ){ recreateAllRuns( arr[a] ); }
         }
@@ -1381,7 +1383,7 @@ function reward( x ){
             v.bonus.push( { type: ``, disp: `Clickable Frenzy!`, remaining: -1 } );
         break;
         case `points`:
-            v.curr.gained += Math.ceil( ( v.curr.gained - v.curr.spent ) * 1.1 ); // 10% points boost
+            v.curr.gained += Math.ceil( ( v.curr.gained - v.curr.spent ) * 0.1 ); // 10% points boost
             switches.displayRewards = true;
             v.bonus.push( { type: ``, disp: `+10% to your <div class="inlineIcon points"></div> holdings!`, remaining: -1 } );
         break;
@@ -1398,11 +1400,11 @@ function reward( x ){
             v.bonus.push( { type: ``, disp: `Your next Upgrade (of any kind) is free!`, remaining: -1 } );
         break;
         case `15mins`:
-            offlineProgress( 15 * 60 * 1000 );// fifteen minutes of progress gain
+            offlineProgress( 0, 15 );// fifteen minutes of progress gain
             v.bonus.push( { type: ``, disp: `15 minutes of idle progress added!`, remaining: -1 } );
         break;
         case `60mins`:
-            offlineProgress( 60 * 60 * 1000 ); // sixty minutes of progress gain
+            offlineProgress( 0, 60 ); // sixty minutes of progress gain
             v.bonus.push( { type: ``, disp: `60 minutes of idle progress added!`, remaining: -1 } );
         break;
         case `output`:
