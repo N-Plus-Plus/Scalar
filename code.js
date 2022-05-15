@@ -341,11 +341,11 @@ function archiveRun( ind ){
 }
 
 function getOffline( ind ){
-    if( v.offline[ind][0] == undefined ){ return { dur: 1, gain: 0, spawn: 1 } }
+    if( v.offline[ind][0] == undefined ){ return { dur: 1e99, gain: 0, spawn: 1e99 } }
     let o = {
-        dur: v.offline[ind].reduce( function (a, n) { return a + ( n.stop - n.start ); }, 0 ) / v.offline[ind].length
+        dur: v.offline[ind].reduce( function (a, n) { return a + ( n.stop - n.start ); }, 0 ) / v.offline[ind].length * 20
         , gain: v.offline[ind].reduce( function (a, n) { return a + n.earn; }, 0 ) / v.offline[ind].length
-        , spawn: v.offline[ind].reduce( function (a, n) { return a + n.start; }, v.offline[ind][0].start * -1 ) / v.offline[ind].length
+        , spawn: v.offline[ind].reduce( function (a, n) { return a + n.start; }, v.offline[ind][0].start * -1 ) / v.offline[ind].length * 20
     }
     return o;
 }
@@ -1156,7 +1156,9 @@ function loadState(){
         display( 0 );
     }
     setIco( v.watermark );
-    if( now() - v.ms.last > global.offlineGrace ){ offlineProgress( now() - v.ms.last ); }
+    let elapsed = now() - v.ms.last;
+    if( elapsed > global.offlineGrace ){ offlineProgress( elapsed ); }
+    if( elapsed > 1 / global.giftChance ){ v.giftDue = true; }
 }
 
 function exportState(){
@@ -1396,7 +1398,7 @@ function reward( x ){
             v.bonus.push( { type: ``, disp: `Your next Upgrade (of any kind) is free!`, remaining: -1 } );
         break;
         case `15mins`:
-            offlineProgress( 15 * 60 * 1000 );// ten minutes of progress gain
+            offlineProgress( 15 * 60 * 1000 );// fifteen minutes of progress gain
             v.bonus.push( { type: ``, disp: `15 minutes of idle progress added!`, remaining: -1 } );
         break;
         case `60mins`:
