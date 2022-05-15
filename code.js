@@ -296,7 +296,7 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
     let speedBoost = 1;
-    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }
+    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / ( 25 / v.upgrades[v.runs[index].span].speedBonus ) ); }
     let b = 0;
     if( v.bonus.length > 0 ){
         for( i in v.bonus ){ if( v.bonus[i].type == `output` ){ b++; }; }
