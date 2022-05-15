@@ -6,6 +6,7 @@ window.addEventListener("keydown", function(e) { pressed( e ) } );
 function onLoad(){
     loadMeta();
     extrapolateMeta();
+    prepOffline();
     buildStat();
     loadState();
     displayRewards();
@@ -40,6 +41,8 @@ function clicked(e){
     if( c.contains(`confirm`) ){ renderUndex(); }
     if( c.contains(`prestige`) ){ safetyOff(); }
     if( c.contains(`refreshMe`) ){ location.reload(); }
+    if( c.contains(`gift`) ){ claimGift(); }
+    if( c.contains(`spinner`) ){ spinToWin(); }
     else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
     else if( c.contains(`tooltip`) ){
         t = t.parentElement;
@@ -64,12 +67,17 @@ function pressed(e){
 function doLoop( tick ){
     if( global.paused ){}
     else{
-        let delta = ( tick - v.ms.last ) * global.godMode;
+        let b = 0;
+        if( v.bonus.length > 0 ){
+            for( i in v.bonus ){ if( v.bonus[i].type == `doubleTime` ){ b++; }; }
+        }
+        let delta = ( tick - v.ms.last ) * global.godMode * Math.pow( 2, b );
         earn( delta );
         progress();
         countdownAbandon( delta );
         showStats();
         if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
+        if( Math.random() < global.giftChance ){ if( v.spins >= 0 ){ v.giftDue = true; } else{ v.spins = 0; } }
         if( tick % 50 == 0 ){ saveState(); }
         v.ms.last = tick;
         if( switches.display ){ display( v.selected); }
@@ -177,7 +185,7 @@ function progress(){
                     buy( r, b, true );
                 }
                 else{ v.runs[r].auto[a]--; }
-            }            
+            }
         }
     }
     if( v.mouseDown && v.clicked !== null ){
@@ -186,6 +194,13 @@ function progress(){
         else if( v.mouseTicks % global.buyEvery !== 0 ){}
         else{ buy( v.selected, v.clicked, false ); }
     }
+    switches.bonusDisplay = false;
+    for( b in v.bonus ){
+        v.bonus[b].remaining--;
+        if( v.bonus[b].remaining == 0 ){ v.bonus.splice(b,1); }
+        else if( v.bonus[b].remaining <= -200 ){ v.bonus.splice(b,1); }
+        switches.bonusDisplay = true;
+    }
     offsetRings();
     displayProgress();
 }
@@ -193,7 +208,9 @@ function progress(){
 function getAutoCompleteTime( r ){
     let raw = global.autoComplete * ( 1000 / global.tickSpeed );
     let s = v.runs[r].span;
-    return Math.ceil( raw * Math.pow( 0.8, v.upgrades[s].autoComplete - 1 ) ) * Math.pow( 0.75, v.upgrades[s].rebirthSpan );
+    let b = 0;
+    for( i in v.bonus ){ if( v.bonus[i].type == `fastAuto` ){ b++; } };
+    return Math.ceil( raw * Math.pow( 0.8, v.upgrades[s].autoComplete - 1 ) ) * Math.pow( 0.75, v.upgrades[s].rebirthSpan ) / Math.pow( 2, b );
 }
 
 function displayProgress(){
@@ -279,8 +296,12 @@ function getSingleCPS( index, i ){
         if( tr[a].id == `overallOutput` ){ o *= ( 1 + tr[a].amt ) }        
     }
     let speedBoost = 1;
-    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }    
-    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps ) * speedBoost;
+    if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += 1 / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / 25 ) * v.upgrades[v.runs[index].span].speedBonus; }
+    let b = 0;
+    if( v.bonus.length > 0 ){
+        for( i in v.bonus ){ if( v.bonus[i].type == `output` ){ b++; }; }
+    }
+    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps ) * speedBoost * Math.pow( 10, b );
 }
 
 function calcReward( index ){
@@ -299,7 +320,7 @@ function complete( ind, auto ){
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
     v.curr.gained++;
-    v.runs.splice(ind,1);
+    archiveRun( ind );
     let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
     if( !auto ){ v.selected = nextSelection; switches.display = true; }
     else if( ind == v.selected ){ v.selected = nextSelection; switches.display = true; }
@@ -311,6 +332,52 @@ function complete( ind, auto ){
     switches.displayRewards = true;
     switches.updateTabButtons = true;
     displayWings();
+}
+
+function archiveRun( ind ){
+    v.offline[v.runs[ind].span].push( { start: v.runs[ind].quest.commence, stop: now(), earn: calcReward(ind) } );
+    v.offline[v.runs[ind].span].splice( 100, 100 );
+    v.runs.splice(ind,1);
+}
+
+function getOffline( ind ){
+    if( v.offline[ind][0] == undefined ){ return { dur: 1, gain: 0, spawn: 1 } }
+    let o = {
+        dur: v.offline[ind].reduce( function (a, n) { return a + ( n.stop - n.start ); }, 0 ) / v.offline[ind].length
+        , gain: v.offline[ind].reduce( function (a, n) { return a + n.earn; }, 0 ) / v.offline[ind].length
+        , spawn: v.offline[ind].reduce( function (a, n) { return a + n.start; }, v.offline[ind][0].start * -1 ) / v.offline[ind].length
+    }
+    return o;
+}
+
+function offlineProgress( ms ){
+    let ticks = Math.floor( ms / global.tickSpeed );
+    let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
+    for( a in arr ){
+        if( v.completed[arr[a]] == undefined ){ break; }
+        let o = getOffline( arr[a] );
+        if( arr[a] == `0` ){
+            let limit = v.upgrades.maxZeros;
+            let c = Math.floor( ticks / ( o.dur / limit ) );
+            v.completed[arr[a]] += Math.floor( c );
+            v.reward[span[arr[a]].curr] += Math.floor( c * o.dur );
+            v.curr.gained += c;
+            if( c > limit ){ recreateAllRuns( arr[a] ); }
+        }
+        else{
+            let limit = global.tierLimit;
+            let c = Math.floor( ticks / ( o.dur / limit ) );
+            let amt = Math.floor( Math.min( c, v.completed[arr[a-1]] / v.upgrades[arr[a]].childReq ) );
+            v.completed[arr[a]] += amt;
+            v.completed[arr[a-1]] -= amt * v.upgrades[arr[a]].childReq;
+            v.reward[span[arr[a]].curr] += Math.floor( c * o.dur );
+            v.curr.gained += amt;
+            if( amt > limit ){ recreateAllRuns( arr[a] ); }
+        }
+    }
+    switches.displayRewards = true;
+    switches.updateDisplay = true;
+    switches.updateRuns = true;
 }
 
 function displayWings(){
@@ -390,7 +457,8 @@ function displayRewards(){
         if( v.reward[type] == undefined ){}
         else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( v.reward[type])}</div>`}
     }
-    t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`;
+    if( v.giftDue ){ t.innerHTML += `<div class="rewardBox"><div class="gift"></div><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
+    else{ t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
     let u = document.querySelectorAll(`[data-curr]`);
     for( let i = 0; i < u.length; i++ ){ u[i].innerHTML = numDisplay( v.reward[span[v.tab].curr] ) };
     switches.displayRewards = false;
@@ -783,6 +851,19 @@ function updateTabButtons(){
 }
 
 function scrollScroll(){
+    if( switches.bonusDisplay ){
+        let f = document.querySelector(`#footer`);
+        f.innerHTML = ``;
+        for( b in v.bonus ){
+            let d = elem( `bonusDisplay` );
+                d.appendChild( elem( `bonusLabel`, v.bonus[b].disp ) );
+                if( v.bonus[b].remaining > 0 ){ d.appendChild( elem( `bonusSecs`, Math.ceil( v.bonus[b].remaining / 20 ) + `s` ) ); }                
+            f.appendChild(d);
+        }
+        return;
+    }
+    if( v.bonus.length == 0 ){ switches.bonusDisplay = false; }
+    if( document.querySelector(`#footer`).children.length == 0 ){ addScroll(); }
     let s = document.querySelector(`.scroll`);
     let newT = parseFloat( s.getAttribute(`data-transform`) ) - global.scrollSpeed;
     s.setAttribute( `data-transform`, newT );
@@ -838,11 +919,13 @@ function buyUpgrade( d, type, tier ){
             if( type == `autoBuy` ){ updateAutoValues(); }
         }
         if( type == `childReq` && global.spanTarget + Object.keys(span).findIndex( e => e == d ) - v.upgrades[d].childReq == 2 ){ selectTab( v.tab, v.miniTab ); }
+        v.nextOneFree = false;
         spawnCheck();
         switches.updateDisplay = true;
         switches.displayRewards = true;        
         switches.tabUpdate = true;
         switches.updateTabButtons = true;
+        switches.updateRuns = true;
     }
 }
 
@@ -865,6 +948,7 @@ function upgradeCost( d, type, tier ){
     let u = upgrades.filter( (e) => e.id == type )[0];
     let c = Math.ceil( u.cost * Math.pow( u.multi, bought ) );
     if( type == `headStart` ){ c = uCost( d, tier ); }
+    if( v.nextOneFree ){ c = 0; }
     return c;
 }
 
@@ -953,6 +1037,53 @@ function recreateRun( index ){
     }
 }
 
+function recreateAllRuns( d ){
+    for( r in v.runs ){
+        if( v.runs[r].span == d ){
+            v.runs[r] = new Run( d );
+            switches.display = true;
+        }
+    }
+}
+
+function claimGift(){
+    v.spins++;
+    v.giftDue = false;
+    switches.displayRewards = true;
+    displaySpinner();
+}
+
+function spinToWin(){
+    v.spins--;
+    let t = document.querySelector(`.spinner`);
+    let arr = [
+        { deg: 18, does: `output`, id: 0 }
+        , { deg: 54, does: `freeUpgrade`, id: 1 }        
+        , { deg: 90, does: `points`, id: 2 }
+        , { deg: 126, does: `60mins`, id: 3 }
+        , { deg: 162, does: `clickMe`, id: 4 }
+        , { deg: 198, does: `moreSpins`, id: 5 }
+        , { deg: 234, does: `reward`, id: 6 }
+        , { deg: 270, does: `doubleTime`, id: 7 }
+        , { deg: 306, does: `fastAuto`, id: 8 }
+        , { deg: 342, does: `15mins`, id: 9 }
+    ]
+    let choice = Math.floor( Math.random() * 10 );
+    let startDeg = parseInt( t.getAttribute(`style`).replace(/[^\d.-]/g, '') );
+    let deg = startDeg + 3600 + arr[choice].deg - ( startDeg == 0 ? 0 : 18 );
+    t.style = `transform: rotate(${deg}deg)`;
+    let sel = deg - ( Math.floor( startDeg / 3600 ) * 3600 );
+    sel -= Math.floor( sel / 360 ) * 360;
+    let oldChoice = arr.findIndex( e => e.deg == sel );
+    let outcome = arr[choice].does;
+    if( oldChoice !== -1 ){ outcome = arr[oldChoice].does };
+    setTimeout(() => { reward( outcome ); }, global.spinTimer );
+}
+
+function displaySpinner(){
+    document.querySelector(`#modal`).classList.remove(`noDisplay`);
+}
+
 function rebirth( s ){
     let n = JSON.stringify( JSON.parse( v.upgrades[s].rebirthSpan ) );
     delete v.upgrades[s];
@@ -993,7 +1124,10 @@ function autoBuyTime( d, t ){
         if( tr[a].id == `fastOverall` ){ o *= ( 1 - tr[a].amt ) }
     }
     o *= ( 1000 / global.tickSpeed );
-    o *= Math.pow( 0.75, v.upgrades[d].rebirthSpan );
+    o *= Math.pow( 0.75, v.upgrades[d].rebirthSpan );    
+    let b = 0;
+    for( i in v.bonus ){ if( v.bonus[i].type == `fastAuto` ){ b++; } };
+    o /= Math.pow( 2, b );
     o = Math.ceil( o );
     return o;
 }
@@ -1021,7 +1155,8 @@ function loadState(){
         topUpZeros();
         display( 0 );
     }
-    setIco( v.watermark );    
+    setIco( v.watermark );
+    if( now() - v.ms.last > global.offlineGrace ){ offlineProgress( now() - v.ms.last ); }
 }
 
 function exportState(){
@@ -1045,19 +1180,15 @@ function download(state) {
   }
 
 function dataFix(){
-    // if( v.fastest == undefined ){ v.fastest = []; }
-    // for( let i = 0; i < 10; i++ ){ if( v.fastest[i] == undefined ){ v.fastest.push( 0 ); } }
-    // if( v.abandonTime == undefined ){ v.abandonTime = []; }
-    // for( let i = 0; i < 10; i++ ){ if( v.abandonTime[i] == undefined ){ v.abandonTime.push( 0 ); } }
-    // meta.upgrades.filter( e => e.id == `headStart` )[0].multi = 1.125;
-    // meta.scale.filter( e => e.id == `span` )[0].adjust = `1+(@-1)*Math.pow(0.9,#)`;
-    // meta.scale.filter( e => e.id == `span` )[0].does = `-10%`;
-    // if( meta.questDef.filter( e => e.id == `buyXGen` ).length == 0 ){
-    //     meta.questDef.push( { basis: `buyXGen`,       locked: true,  nice: `Buy Any Tier Type`, p: { target: 70, verbiage: `Buy N Generators of any Tier` } } );
-    // }
     if( meta.upgrades[1].multi == 2 ){ meta.upgrades[1].multi = 1.75; upgrades[1].multi = 1.75; }
     if( v.reward.undefined == null ){ delete v.reward.undefined; }
     for( i in v.reward ){ if( v.reward[i] == null ){ delete v.reward[i]; } else{ v.reward[i] = Math.ceil( v.reward[i] ); } }
+    if( v.bonus == undefined ){ v.bonus = []; }
+    if( v.nextOneFree == undefined ){ v.nextOneFree = false; }
+    if( v.spins == undefined ){ v.spins = 0; }
+    if( v.offline == undefined ){ v.offline = {}; prepOffline(); }
+    if( v.removeDoubleCount !== undefined ){ delete v.removeDoubleCount; }
+    if( v.giftDue == undefined ){ v.giftDue = true; }
 }
 
 function safetyOff(){
@@ -1225,46 +1356,66 @@ function doItAllOverAgain(){
     v.multi = 0;
     v.recreates = 0;
     v.fastest = [];
+    v.bonus = [];
+    v.nextOneFree = false;
+    v.spins = 0;
+    v.offline = {};
+    prepOffline();
     extrapolateMeta();
     saveState();
     location.reload();
 }
 
+function prepOffline(){
+    let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
+    for( a in arr ){ v.offline[arr[a]] = []; }
+}
+
 function reward( x ){
+    console.log(x);
     switch( x ){
         case `clickMe`:
             for( let i = 0; i < 100; i++ ){ spawnClickMe(); } // 100 clickables
+            v.bonus.push( { type: ``, disp: `Clickable Frenzy!`, remaining: -1 } );
         break;
         case `points`:
-            v.curr.gained += Math.ceil( ( v.curr.gained - v.curr.spent ) * 0.05 ); // 5% points boost
+            v.curr.gained += Math.ceil( ( v.curr.gained - v.curr.spent ) * 1.1 ); // 10% points boost
             switches.displayRewards = true;
+            v.bonus.push( { type: ``, disp: `+10% to your <div class="inlineIcon points"></div> holdings!`, remaining: -1 } );
         break;
         case `reward`:
-            for( i in v.reward ){ v.reward[i] = Math.ceil( v.reward[i] * 0.05  ); }; // +5% all Reward
+            for( i in v.reward ){ v.reward[i] = Math.ceil( v.reward[i] * 1.2  ); }; // +20% all Reward
+            v.bonus.push( { type: ``, disp: `+20% to ALL of your reward currencies!`, remaining: -1 } );
             switches.displayRewards = true;
         break;
         case `doubleTime`:
-            // double time for n ticks
+            v.bonus.push( { type: `doubleTime`, disp: `Double Speed`, remaining: global.bonusTime * 20 } ); // double time for n ticks
         break;
         case `freeUpgrade`:
-            // next Upgrade costs 0
+            v.nextOneFree = true; // next Upgrade costs 0
+            v.bonus.push( { type: ``, disp: `Your next Upgrade (of any kind) is free!`, remaining: -1 } );
         break;
-        case `10mins`:
-            // ten minutes of progress gain
+        case `15mins`:
+            offlineProgress( 15 * 60 * 1000 );// ten minutes of progress gain
+            v.bonus.push( { type: ``, disp: `15 minutes of idle progress added!`, remaining: -1 } );
         break;
         case `60mins`:
-            // sixty minutes of progress gain
+            offlineProgress( 60 * 60 * 1000 ); // sixty minutes of progress gain
+            v.bonus.push( { type: ``, disp: `60 minutes of idle progress added!`, remaining: -1 } );
         break;
-        case ``:
-            // HERE
+        case `output`:
+            v.bonus.push( { type: `output`, disp: `10x All Output`, remaining: global.bonusTime * 20 } ); // 10x output for 300 seconds
+            switches.display = true;
         break;
-        case ``:
-            // 
+        case `fastAuto`:
+            v.bonus.push( { type: `fastAuto`, disp: `2x Faster Automation`, remaining: global.bonusTime * 20 } ); // all automation timers /2 for 300 seconds
         break;
         case `moreSpins`:
-            // 2 more spins
+            v.spins += 2; // 2 more spins
+            v.bonus.push( { type: ``, disp: `Two more spins!`, remaining: -1 } );
         break;
     }
+    if( v.spins <= 0 ){ document.querySelector(`#modal`).classList.add( `noDisplay` ); }
 }
 
 function resetData(){
@@ -1412,6 +1563,7 @@ const helpful = [
     , `Surely there's going to be a Prestige at some point...`
     , `Is this game suggesting that Particles just appear given enough Uncertainty?`
     , `Humorous messages will appear here... focussing on features at the sec`
+    , `<div class="upsideDown">I wonder if anyone will even notice this message</div>`
 ]
 
 const helpless = [

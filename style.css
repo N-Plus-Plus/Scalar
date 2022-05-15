@@ -164,3 +164,12 @@ input:checked + .slider:before { transform: translateX(1.5rem); }
 .scalarCost{ font-size: 1rem; display: flex; align-items: flex-end; }
 .scalarNum{ margin: 0 0.5rem; font-family: var(--numeric); font-weight: 800; display: flex;}
 .refreshMe{ text-decoration: underline; cursor: pointer;}
+.upsideDown{ transform: rotate(180deg);}
+
+.gift{ width: 1.5rem; height: 1.5rem; margin: 0 0.75rem 0 0; background-image: url(./gift.png); position: absolute; left: -2.5rem; cursor: pointer; }
+.modal{ position: absolute; top: 0; left: 0; height: 100%; width: 100%; background-color: #000D; z-index: 50;}
+.spinner{ position: absolute; width: 40rem; height: 40rem; left: calc( 50% - 20rem ); top: calc( 50% - 20rem ); background-image: url(./wheel.png); border-radius: 50%; cursor: pointer; transition: all 5s cubic-bezier(0,0.5,0,1); }
+.pointer{ position: absolute; width: 8rem; height: 8rem; left: calc( 50% - 4rem ); top: calc( 50% - 24rem ); background-image: url(./pointer.png); z-index: 51;}
+.bonusDisplay{ display: flex; margin: 1rem 1rem 0 0; }
+.bonusLabel{ display: flex; }
+.bonusSecs{ font-family: var(--numeric); font-weight: 800; margin-left: 0.5rem; font-size: 1.1rem; }
