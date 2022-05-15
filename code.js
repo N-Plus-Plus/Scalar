@@ -343,17 +343,16 @@ function archiveRun( ind ){
 function getOffline( ind ){
     if( v.offline[ind][0] == undefined ){ return { dur: 1e99, gain: 0, spawn: 1e99 } }
     let o = {
-        dur: v.offline[ind].reduce( function (a, n) { return a + ( n.stop - n.start ); }, 0 ) / v.offline[ind].length * 20
+        dur: v.offline[ind].reduce( function (a, n) { return a + ( n.stop - n.start ); }, 0 ) / v.offline[ind].length
         , gain: v.offline[ind].reduce( function (a, n) { return a + n.earn; }, 0 ) / v.offline[ind].length
-        , spawn: v.offline[ind].reduce( function (a, n) { return a + n.start; }, v.offline[ind][0].start * -1 ) / v.offline[ind].length * 20
+        , spawn: v.offline[ind].reduce( function (a, n) { return a + n.start; }, v.offline[ind][0].start * -1 ) / v.offline[ind].length
     }
     return o;
 }
 
 function offlineProgress( ms, n ){
+    if( n !== undefined ){ ms = n * 60 * 1000; }
     let ticks = Math.floor( ms / global.tickSpeed );
-    if( n == undefined ){ n = 0; }
-    else{ n = ticks / 6e4; }
     let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
     for( a in arr ){
         if( v.completed[arr[a]] == undefined ){ break; }
@@ -372,8 +371,9 @@ function offlineProgress( ms, n ){
             let amt = Math.floor( Math.min( c, v.completed[arr[a-1]] / v.upgrades[arr[a]].childReq ) );
             v.completed[arr[a]] += amt;
             v.completed[arr[a-1]] -= amt * v.upgrades[arr[a]].childReq;
-            v.reward[span[arr[a]].curr] += Math.floor( ( n * 60000 ) / getOffline(arr[a]).dur * 3 * getOffline(arr[a]).gain );
+            v.reward[span[arr[a]].curr] += Math.floor( ms / ( getOffline(arr[a]).dur / amt ) * getOffline(arr[a]).gain );
             v.curr.gained += amt;
+            console.log(ticks, o.dur, limit, ticks / o.dur / limit, c, amt)
             if( amt > limit ){ recreateAllRuns( arr[a] ); }
         }
     }
