@@ -339,7 +339,7 @@ function complete( ind, auto ){
 
 function offlineSnapshot(){
     let obj = { time: now(), points: v.curr.gained }
-    for( i in span ){ let n = 0; if( v.reward[i] !== undefined ){ n = v.reward[i].gained; }; obj[span[i].curr] = n; }
+    for( i in span ){ let n = 0; if( v.reward[span[i].curr] !== undefined ){ n = v.reward[span[i].curr].gained; }; obj[span[i].curr] = n; }
     v.snaps.push( obj );
     v.snaps.splice( 60, 1 );
 }
