@@ -6,7 +6,6 @@ window.addEventListener("keydown", function(e) { pressed( e ) } );
 function onLoad(){
     loadMeta();
     extrapolateMeta();
-    prepOffline();
     buildStat();
     loadState();
     displayRewards();
@@ -324,7 +323,6 @@ function complete( ind, auto ){
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
     v.curr.gained++;
-    archiveRun( ind );
     let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
     if( !auto ){ v.selected = nextSelection; switches.display = true; }
     else if( ind == v.selected ){ v.selected = nextSelection; switches.display = true; }
@@ -336,22 +334,6 @@ function complete( ind, auto ){
     switches.displayRewards = true;
     switches.updateTabButtons = true;
     displayWings();
-}
-
-function archiveRun( ind ){
-    v.offline[v.runs[ind].span].push( { start: v.runs[ind].quest.commence, stop: now(), earn: calcReward(ind) } );
-    v.offline[v.runs[ind].span].splice( 100, 100 );
-    v.runs.splice(ind,1);
-}
-
-function getOffline( ind ){
-    if( v.offline[ind][0] == undefined ){ return { dur: 1e99, gain: 0, spawn: 1e99 } }
-    let o = {
-        dur: v.offline[ind].reduce( function (a, n) { return a + ( n.stop - n.start ); }, 0 ) / v.offline[ind].length
-        , gain: v.offline[ind].reduce( function (a, n) { return a + n.earn; }, 0 ) / v.offline[ind].length
-        , spawn: v.offline[ind].reduce( function (a, n) { return a + n.start; }, v.offline[ind][0].start * -1 ) / v.offline[ind].length
-    }
-    return o;
 }
 
 function offlineSnapshot(){
@@ -370,32 +352,6 @@ function offlineProgress( ms ){
     for( i in v.snaps[l-1] ){ if( v.snaps[l-mins][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } }
     v.curr.gained += d.points;
     for( r in v.reward ){ v.reward[r].gained += d[r] }
-    return;
-    if( n !== undefined ){ ms = n * 60 * 1000; }
-    let ticks = Math.floor( ms / global.tickSpeed );
-    let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
-    for( a in arr ){
-        if( v.completed[arr[a]] == undefined ){ break; }
-        let o = getOffline( arr[a] );
-        if( arr[a] == `0` ){
-            let limit = v.upgrades.maxZeros;
-            let c = Math.floor( ticks / ( o.dur / limit ) );
-            v.completed[arr[a]] += Math.floor( c );
-            v.reward[span[arr[a]].curr] += Math.floor( c * o.dur );
-            v.curr.gained += c;
-            if( c > limit ){ recreateAllRuns( arr[a] ); }
-        }
-        else{
-            let limit = global.tierLimit;
-            let c = Math.floor( ticks / ( o.dur / limit ) );
-            let amt = Math.floor( Math.min( c, v.completed[arr[a-1]] / v.upgrades[arr[a]].childReq ) );
-            v.completed[arr[a]] += amt;
-            v.completed[arr[a-1]] -= amt * v.upgrades[arr[a]].childReq;
-            v.reward[span[arr[a]].curr] += Math.floor( ms / ( getOffline(arr[a]).dur / amt ) * getOffline(arr[a]).gain );
-            v.curr.gained += amt;
-            if( amt > limit ){ recreateAllRuns( arr[a] ); }
-        }
-    }
     switches.displayRewards = true;
     switches.updateDisplay = true;
     switches.updateRuns = true;
@@ -496,6 +452,7 @@ function updateTabs(){
     tb.innerHTML += `<div class="tab" data-tab="points" data-span="points"><div class="points tabIco"></div></div>`;
     t.appendChild(tb);
     t.appendChild(elem(`tabContents`,``,[[`upgrades`,null]]));
+    selectTab( v.tab, v.miniTab );
 }
 
 function selectJerk( j ){
@@ -1112,7 +1069,6 @@ function rebirth( s ){
     delete v.upgrades[s];
     buildUpgrades();
     v.upgrades[s].rebirthSpan = parseInt( n ) + 1;
-    v.offline[s] = [];
     display( v.selected );
     selectTab( v.tab, v.miniTab );
     saveState();
@@ -1213,7 +1169,6 @@ function dataFix(){
     if( v.bonus == undefined ){ v.bonus = []; }
     if( v.nextOneFree == undefined ){ v.nextOneFree = false; }
     if( v.spins == undefined ){ v.spins = 0; }
-    if( v.offline == undefined ){ v.offline = {}; prepOffline(); }
     if( v.removeDoubleCount !== undefined ){ delete v.removeDoubleCount; }
     if( v.giftDue == undefined ){ v.giftDue = true; }
     if( v.snaps == undefined ){ v.snaps = []; }
@@ -1222,6 +1177,9 @@ function dataFix(){
             for( r in v.reward ){ let x = JSON.parse( JSON.stringify( v.reward[r] ) ); v.reward[r] = { gained: x, spent: 0 }; };
         }
     }
+    if( v.offline !== undefined ){ delete v.offline }
+    upgrades.filter( e => e.id == `abandonQuest`)[0].cost = 5;
+    upgrades.filter( e => e.id == `abandonQuest`)[0].multi = 2;
 }
 
 function safetyOff(){
@@ -1392,16 +1350,10 @@ function doItAllOverAgain(){
     v.bonus = [];
     v.nextOneFree = false;
     v.spins = 0;
-    v.offline = {};
-    prepOffline();
+    v.snaps = [];
     extrapolateMeta();
     saveState();
     location.reload();
-}
-
-function prepOffline(){
-    let arr = [`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`];
-    for( a in arr ){ v.offline[arr[a]] = []; }
 }
 
 function reward( x ){
@@ -1623,16 +1575,8 @@ Make the cursor into a force when assigning mode is live
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
 
-Uncertainty     None
-Particles       Higgs Boson
-Atoms           Split Atom
-Molecules       Anti-Matter
-Organelles      Mitochondrial Degrade
-Cells           Cancer
-Organisms       Warfare
-Ideas           Superintelligence
-Code            Divided by zero
-Features        
+Spinner buffs:
+- - Term based discount to all upgrades?
 
 */
 
