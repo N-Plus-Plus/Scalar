@@ -350,13 +350,13 @@ function offlineProgress( ms ){
     let l = v.snaps.length;
     if( l < mins ){ multi = mins / l; mins = v.snaps.length; }
     let d = {}
-    for( i in v.snaps[0] ){ if( v.snaps[l-mins][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } else{ d[i] = 0; } }
+    for( i in v.snaps[0] ){ if( v.snaps[l-mins][i] !== undefined && v.snaps[l-1][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } else{ d[i] = 0; } }
     v.curr.gained += d.points;
     for( r in v.reward ){ if( d[r] != undefined ){ v.reward[r].gained += d[r] } }
     switches.displayRewards = true;
     switches.updateDisplay = true;
     switches.updateRuns = true;
-    console.log( mins )
+    console.log( mins, d );
 }
 
 function displayWings(){
