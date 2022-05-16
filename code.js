@@ -341,7 +341,7 @@ function offlineSnapshot(){
     let obj = { time: now(), points: v.curr.gained }
     for( i in span ){ let n = 0; if( v.reward[span[i].curr] !== undefined ){ n = v.reward[span[i].curr].gained; }; obj[span[i].curr] = n; }
     v.snaps.push( obj );
-    v.snaps.splice( 60, 1 );
+    if( v.snaps.length >= 60 ){ v.snaps.shift(); }
 }
 
 function offlineProgress( ms ){
