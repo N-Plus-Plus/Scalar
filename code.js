@@ -327,6 +327,7 @@ function complete( ind, auto ){
     if( !auto ){ v.selected = nextSelection; switches.display = true; }
     else if( ind == v.selected ){ v.selected = nextSelection; switches.display = true; }
     else if( v.selected >= ind ){ v.selected--; switches.display = true; }
+    v.runs.splice(ind,1)
     topUpZeros();
     spawnCheck();
     switches.tabUpdate = true;
@@ -355,6 +356,7 @@ function offlineProgress( ms ){
     switches.displayRewards = true;
     switches.updateDisplay = true;
     switches.updateRuns = true;
+    console.log( mins )
 }
 
 function displayWings(){
