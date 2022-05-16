@@ -323,11 +323,11 @@ function complete( ind, auto ){
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
     v.curr.gained++;
+    v.runs.splice(ind,1)
     let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
     if( !auto ){ v.selected = nextSelection; switches.display = true; }
     else if( ind == v.selected ){ v.selected = nextSelection; switches.display = true; }
     else if( v.selected >= ind ){ v.selected--; switches.display = true; }
-    v.runs.splice(ind,1)
     topUpZeros();
     spawnCheck();
     switches.tabUpdate = true;
