@@ -350,9 +350,9 @@ function offlineProgress( ms ){
     let l = v.snaps.length;
     if( l < mins ){ multi = mins / l; mins = v.snaps.length; }
     let d = {}
-    for( i in v.snaps[l-1] ){ if( v.snaps[l-mins][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } }
+    for( i in v.snaps[0] ){ if( v.snaps[l-mins][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } else{ d[i] = 0; } }
     v.curr.gained += d.points;
-    for( r in v.reward ){ v.reward[r].gained += d[r] }
+    for( r in v.reward ){ if( d[r] != undefined ){ v.reward[r].gained += d[r] } }
     switches.displayRewards = true;
     switches.updateDisplay = true;
     switches.updateRuns = true;
@@ -498,16 +498,19 @@ function getTraits( s ){
 }
 
 function selectTab( n, m ){
-    if( m == undefined ){ m = 0; }
-    let t = document.querySelectorAll(`.tab`);
-    for( let i = 0; i < t.length; i++ ){ t[i].classList.remove(`active`); }
-    document.querySelector(`[data-tab="${n}"]`).classList.add(`active`);
-    let d = document.querySelector(`[data-tab="${n}"]`).getAttribute( `data-span` );
-    if( span[d] == undefined ){ color = `#656D78`; }
-    else{ color = span[d].color; }
-    document.documentElement.style.setProperty('--tab', color );
-    buildTabContents( d, m );
-    if( v.tab !== `points` ){ document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="currDisplay" data-curr="${v.tab}">${numDisplay( netReward( span[v.tab].curr ) )}</div>`; }
+    if( v.curr.gained > 0 ){
+        if( m == undefined ){ m = 0; }
+        if( n == undefined ){ n = 0; }
+        let t = document.querySelectorAll(`.tab`);
+        for( let i = 0; i < t.length; i++ ){ t[i].classList.remove(`active`); }
+        document.querySelector(`[data-tab="${n}"]`).classList.add(`active`);
+        let d = document.querySelector(`[data-tab="${n}"]`).getAttribute( `data-span` );
+        if( span[d] == undefined ){ color = `#656D78`; }
+        else{ color = span[d].color; }
+        document.documentElement.style.setProperty('--tab', color );
+        buildTabContents( d, m );
+        if( v.tab !== `points` ){ document.querySelector(`[data-name]`).innerHTML = `${span[v.tab].label} Upgrades<div class="currDisplay" data-curr="${v.tab}">${numDisplay( netReward( span[v.tab].curr ) )}</div>`; }
+    }
 }
 
 function updateTabDisplay(){
