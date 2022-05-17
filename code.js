@@ -1135,6 +1135,7 @@ function loadState(){
     else{
         v.ms.start = new Date().getTime() / global.tickSpeed;
         v.ms.last = now();
+        v.bonus = [];
         buildUpgrades();
         topUpZeros();
         display( 0 );
