@@ -238,7 +238,9 @@ function afford( index, g ){
 }
 
 function cost( index, g ){
-    let n = Math.max( 0, v.runs[index].gen[g] - v.upgrades[v.runs[index].span].scaleDelay[g] );
+    let sD = 0;
+    if( v.upgrades[v.runs[index].span].scaleDelay !== undefined ){ sD = v.upgrades[v.runs[index].span].scaleDelay[g]; }
+    let n = Math.max( 0, v.runs[index].gen[g] - sD );
     let div = 1;
     let tr = getTraits( v.runs[index].span );
     let multi = 1;
