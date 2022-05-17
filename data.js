@@ -20,8 +20,8 @@ var v = {
     , nextOneFree: false
     , giftDue: true
     , spins: 0
-    , offline: {}
     , snaps: []
+    , bonus: []
 }
 
 const global = {
@@ -69,14 +69,14 @@ var meta = {
         , { id: `recruitJerk`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 2, benefit: 1, multi: 1.75, nice: `Create Force`, tooltip: `Add one Cosmic Force to your roster` } }
         , { id: `clickTilting`,     locked: true,   bought: 0,  adjust: ``, p: { scope: `global`, cost: 4, benefit: 1.05, multi: 1.75, nice: `Tilt Clickables`, tooltip: `Adjust the odds of what Clickable will spawn towards higher layers` } } ////
         , { id: `startCash`,        locked: false,  bought: 0,  adjust: ``, p: { scope: `span`, cost: 5, benefit: 2.5, multi: 1.5, nice: `Start Wealth`, tooltip: `Double the amount of resource you start with` } }
+        , { id: `abandonQuest`,     locked: true,   bought: 0,  adjust: ``, p: { scope: `span`, cost: 5, benefit: 1.1, multi: 2, nice: `Abandon Quest`, tooltip: `Enable / Speed Up ability to abandon and regenerate a Quest` } } //
         , { id: `autoComplete`,     locked: false,  bought: 0,  adjust: ``, p: { scope: `span`, cost: 10, benefit: 1.1, multi: 2, nice: `Auto-Complete`, tooltip: `Enable / Speed Up auto-completion by 20%` } }
         , { id: `childReq`,         locked: false,  bought: 0,  adjust: ``, p: { scope: `span`, cost: 10, benefit: 1, multi: 2.5, nice: `Children Required`, tooltip: `Reduce the lower-level completions required by 1` } }
-        , { id: `abandonQuest`,     locked: true,   bought: 0,  adjust: ``, p: { scope: `span`, cost: 50, benefit: 1.1, multi: 2.5, nice: `Abandon Quest`, tooltip: `Enable / Speed Up ability to abandon and regenerate a Quest` } } //
         , { id: `speedBonus`,       locked: true,   bought: 0,  adjust: ``, p: { scope: `span`, cost: 1e2, benefit: 1, multi: 10, nice: `Speed Bonus`, tooltip: `Gain a bonus to output based on the fastest lap achieved` } } ////
         // , { id: `outputBonus`,      locked: true,   bought: 0,  adjust: ``, p: { scope: `span`, cost: 1e2, benefit: 1, multi: 10, nice: `Output Bonus`, tooltip: `Gain a bonus to automation speed based on the highest earning lap achieved` } } //
         , { id: `rebirthSpan`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `span`, cost: 1e3, benefit: 1, multi: 10, nice: `Rebirth Layer`, tooltip: `Reset all other upgrades back to 0 to gain a 5&#xD7; Income boost and 25% faster automation` } }
         , { id: `autoBuy`,          locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 5, benefit: 1.1, multi: 1.125, nice: `Auto Buyer`, tooltip: `Enable / Spped up auto-buying by 10%` } }
-        , { id: `scaleDelay`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 5, benefit: 1, multi: 1.5, nice: `Scale Delay`, tooltip: `Delay the start of cost scaling by 1 (more)` } }
+        , { id: `scaleDelay`,       locked: true,   bought: 0,  adjust: ``, p: { scope: `tier`, cost: 5, benefit: 1, multi: 1.5, nice: `Scale Delay`, tooltip: `Delay the start of cost scaling by 1 (more)` } }
         , { id: `creepReduce`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.05, multi: 2.5, nice: `Cost Scaling`, tooltip: `Reduce the amount by which costs scale by 5%` } }
         , { id: `bulkBonus`,        locked: false,  bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.005, multi: 2, nice: `Bulk Bonus`, tooltip: `Increase output by 0.5% &#xD7; total owned` } }
         , { id: `headStart`,        locked: true,   bought: 0,  adjust: ``, p: { scope: `tier`, cost: 10, benefit: 1.005, multi: 1.125, nice: `Head Start`, tooltip: `Start with 1 (more) Generator of this Tier owned` } } ////

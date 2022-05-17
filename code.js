@@ -356,7 +356,6 @@ function offlineProgress( ms ){
     switches.displayRewards = true;
     switches.updateDisplay = true;
     switches.updateRuns = true;
-    console.log( mins, d );
 }
 
 function displayWings(){
@@ -1354,6 +1353,7 @@ function doItAllOverAgain(){
     v.fastest = [];
     v.bonus = [];
     v.nextOneFree = false;
+    v.giftDue = false;
     v.spins = 0;
     v.snaps = [];
     extrapolateMeta();
@@ -1575,6 +1575,7 @@ TODO
 Buying Global Upgrades doesn't update Bought or Cost ...
 Unlocking a new tab deselects all tabs...
 Make the cursor into a force when assigning mode is live
+When buying last Children Required, doesn't disappear
 
 
 Totally New Features (make work and show costing)
