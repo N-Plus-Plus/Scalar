@@ -303,10 +303,8 @@ function getSingleCPS( index, i ){
     let speedBoost = 1;
     if( v.upgrades[v.runs[index].span].speedBonus > 0 ){ speedBoost += v.upgrades[v.runs[index].span].speedBonus / Math.log( 1 + Math.max( 0.0001, v.fastest[v.runs[index].span] ) / 25 ); }
     let b = 0;
-    if( v.bonus.length > 0 ){
-        for( i in v.bonus ){ if( v.bonus[i].type == `output` ){ b++; }; }
-    }
-    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps ) * speedBoost * Math.pow( 10, b );
+    if( v.bonus.length > 0 ){ for( x in v.bonus ){ if( v.bonus[x].type == `output` ){ b++; }; } }
+    return o * Math.pow( 10, v.multi ) * Math.pow( 5, v.upgrades[v.runs[index].span].rebirthSpan ) * ( 1 + meta.laps ) * Math.pow( 10, b ) * speedBoost;
 }
 
 function calcReward( index ){
@@ -350,6 +348,7 @@ function offlineProgress( ms ){
     let mins = Math.ceil( ms / 1000 / 60 );
     let multi = 1;
     let l = v.snaps.length;
+    if( l.length == 0 ){ return; }
     if( l < mins ){ multi = mins / l; mins = v.snaps.length; }
     let d = {}
     for( i in v.snaps[0] ){ if( v.snaps[l-mins][i] !== undefined && v.snaps[l-1][i] !== undefined ){ d[i] = Math.ceil( ( v.snaps[l-1][i] - v.snaps[l-mins][i] ) * multi ) } else{ d[i] = 0; } }
@@ -1142,6 +1141,7 @@ function loadState(){
         topUpZeros();
         display( 0 );
     }
+    for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) ){ recreateRun(r) } };
     setIco( v.watermark );
     let elapsed = now() - v.ms.last;
     if( elapsed > global.offlineGrace ){ offlineProgress( elapsed ); }
@@ -1623,3 +1623,4 @@ const referrals = [
     , { name: ``, url: ``, visited: 0 }
     , { name: ``, url: ``, visited: 0 }
 ]
+
