@@ -1187,7 +1187,7 @@ function dataFix(){
     upgrades.filter( e => e.id == `abandonQuest`)[0].cost = 5;
     upgrades.filter( e => e.id == `abandonQuest`)[0].multi = 2;
     for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) || v.runs[r].curr.cps == null ){ recreateRun(r) } };
-    for( r in v.runs ){ if( v.runs[r].curr.cps == null ){ updateCPS(r) } else if( v.runs[r].curr.gained == 0 ){ v.runs[r].curr.gained = 10 } };
+    for( r in v.runs ){ if( v.runs[r].curr.gained == 0 ){ v.runs[r].curr.gained = 10 } if( v.runs[r].curr.cps == null ){ updateCPS(r) } };
 }
 
 function safetyOff(){
