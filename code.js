@@ -1141,7 +1141,6 @@ function loadState(){
         topUpZeros();
         display( 0 );
     }
-    for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) ){ recreateRun(r) } };
     setIco( v.watermark );
     let elapsed = now() - v.ms.last;
     if( elapsed > global.offlineGrace ){ offlineProgress( elapsed ); }
@@ -1187,6 +1186,8 @@ function dataFix(){
     if( v.offline !== undefined ){ delete v.offline }
     upgrades.filter( e => e.id == `abandonQuest`)[0].cost = 5;
     upgrades.filter( e => e.id == `abandonQuest`)[0].multi = 2;
+    for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) || v.runs[r].curr.cps == null ){ recreateRun(r) } };
+    for( r in v.runs ){ if( v.runs[r].curr.cps == null ){ updateCPS(r) } else if( v.runs[r].curr.gained == 0 ){ v.runs[r].curr.gained = 10 } };
 }
 
 function safetyOff(){
