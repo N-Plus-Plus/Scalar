@@ -1353,7 +1353,7 @@ function doItAllOverAgain(){
     v.watermark = 0;    
     v.multi = 0;
     v.recreates = 0;
-    v.fastest = [];
+    v.fastest = [0,0,0,0,0,0,0,0,0,0];
     v.bonus = [];
     v.nextOneFree = false;
     v.giftDue = false;
