@@ -1409,6 +1409,11 @@ function reward( x ){
         break;
     }
     if( v.spins <= 0 ){ document.querySelector(`#modal`).classList.add( `noDisplay` ); }
+    switches.displayRewards = true;
+    switches.displayRuns = true;
+    switches.tabUpdate = true;
+    switches.updateDisplay = true;
+    switches.updateTabButtons = true;
 }
 
 function resetData(){
