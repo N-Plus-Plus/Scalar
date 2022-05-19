@@ -76,7 +76,7 @@ function doLoop( tick ){
         countdownAbandon( delta );
         showStats();
         if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
-        if( Math.random() < global.giftChance ){ if( v.spins >= 0 ){ v.giftDue = true; } else{ v.spins = 0; } }
+        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ v.giftDue = true; } else{ v.spins = 0; } }
         if( tick % 50 == 0 ){ saveState(); }
         if( tick % 1200 == 0 ){ offlineSnapshot(); }
         v.ms.last = tick;
@@ -1544,18 +1544,22 @@ const helpful = [
     , `Click the Auto Buy icon at the top of the column to pause / unpause all`
     , `Buy Generators fast by pressing and holding the Tier number on your keyboard`
     , `Cosmic Forces are a big investment for a potentially massive impact`
-    , `You will generate resource while offline, but automation only applies to an open window`
-    , `Rewards are based on how much resource you hold`
+    , `Quest rewards are based on how much resource you hold`
     , `Bulk Bonus upgrades reward owning a lot of a particular Tier`
     , `You gain one <div class="inlineIcon points"></div> for every completion`
     , `Assign a Cosmic Force to gain its benefit`
+    , `Rebirth will trade all your upgrades for a big boost, but you'll keep your wealth`
+    , `Your progress will save automatically every few seconds`
 
     , `59 6F 75 20 77 65 6E 74 20 74 6F 20 61 20 6C 6F 74 20 6F 66 20 74 72 6F 75 62 6C 65 20 74 6F 20 72 65 61 64 20 74 68 69 73 2E 2E 2E`
     , `I'm not convinced that the person who made this game understands what the word "scalar" means...`
     , `Is this all building towards something?`
     , `Surely there's going to be a Prestige at some point...`
     , `Is this game suggesting that Particles just appear given enough Uncertainty?`
-    , `Humorous messages will appear here... focussing on features at the sec`
+    , `Humorous messages will appear here... focussing on features for the moment`
+    , `For a huge performance improvement, try making smarter choices`
+    , `This space for rent`
+    , `Why do trees keep such good time? They've got log-a-rhythm...`
     , `<div class="upsideDown">I wonder if anyone will even notice this message</div>`
 ]
 
@@ -1563,7 +1567,8 @@ const helpless = [
     `Wait ... did I just build the game I've been playing this whole time?`
     , `I'm So Meta Even This Acronym`
     , `If thinking about thinking is called metacognition, what is thinking about metacognition called?`
-    , `Is the reward for finishing really just starting all over again with a minor change?`
+    , `Is the reward for finishing really just starting all over again with a couple of minor changes?`
+    , `Why would you pay to turn a feature off?`
 ]
 
 function addTestData(){
