@@ -317,7 +317,7 @@ function complete( ind, auto ){
     if( !v.runs[ind].quest.complete ){ return; }
     let d = parseFloat( JSON.parse( JSON.stringify( v.runs[ind].span ) ) );
     let time = parseInt( JSON.parse( JSON.stringify( now() - v.runs[ind].quest.commence ) ) );
-    if( time < v.fastest[d] || v.fastest[d] == 0 ){ v.fastest[d] = time; }
+    if( time < v.fastest[d] || v.fastest[d] == 0 ){ v.fastest[d] = Math.max( time, 1 ); }
     if( v.reward[span[d].curr] == undefined ){ v.reward[span[d].curr] = { gained: 0, spent: 0 }; }
     v.reward[span[d].curr].gained += calcReward( ind );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
@@ -454,7 +454,7 @@ function updateTabs(){
     tb.innerHTML += `<div class="tab" data-tab="points" data-span="points"><div class="points tabIco"></div></div>`;
     t.appendChild(tb);
     t.appendChild(elem(`tabContents`,``,[[`upgrades`,null]]));
-    selectTab( v.tab, v.miniTab );
+    if( v.tab !== null ){ selectTab( v.tab, v.miniTab ); }
 }
 
 function selectJerk( j ){
@@ -903,7 +903,7 @@ function buyUpgrade( d, type, tier ){
             buildMiniTabContents( tier, d );
             if( type == `autoBuy` ){ updateAutoValues(); }
         }
-        if( type == `childReq` && global.spanTarget + Object.keys(span).findIndex( e => e == d ) - v.upgrades[d].childReq == 2 ){ selectTab( v.tab, v.miniTab ); }
+        if( type == `childReq` && global.spanTarget + Object.keys(span).findIndex( e => e == d ) - v.upgrades[d].childReq == 1 ){ selectTab( v.tab, v.miniTab ); }
         v.nextOneFree = false;
         spawnCheck();
         switches.updateDisplay = true;
@@ -1576,10 +1576,7 @@ function addTestData(){
 /*
 
 TODO
-Buying Global Upgrades doesn't update Bought or Cost ...
-Unlocking a new tab deselects all tabs...
 Make the cursor into a force when assigning mode is live
-When buying last Children Required, doesn't disappear
 
 
 Totally New Features (make work and show costing)
