@@ -10,6 +10,8 @@
     --invis: #0000;    
     --span: #a07e36;
     --tab: #a07e36;
+
+    --jerk: url(./jerkSmall.png);
 }
 
 
@@ -103,6 +105,7 @@ section{ max-height: calc( 100% - 7rem ); padding-bottom: 0; padding-top: 0.75re
 .jerk.unassigned{ width: 2rem; height: 2rem; }
 .jerk.assigned{ width: 2rem; height: 2rem; position: absolute; top: 0; left: 0; margin: -1px; pointer-events: none; }
 .currDisplay{ font-weight: 800; font-family: var(--numeric); font-size: 1.5rem; padding-right: 0.5rem;}
+.invis{ opacity: 0; pointer-events: none; }
 
 .ring{ cursor: pointer; width: 2.5rem; height: 2rem; padding-left: 0.5rem; padding-top: 0.5rem; display: flex; align-items: center; justify-content: center; }
 .circle{ pointer-events: none;}
@@ -173,3 +176,4 @@ input:checked + .slider:before { transform: translateX(1.5rem); }
 .bonusDisplay{ display: flex; margin: 1rem 1rem 0 0; }
 .bonusLabel{ display: flex; }
 .bonusSecs{ font-family: var(--numeric); font-weight: 800; margin-left: 0.5rem; font-size: 1.1rem; }
+.jerkCursor{ cursor: url(./jerkTiny.png) 16 16,auto; }
