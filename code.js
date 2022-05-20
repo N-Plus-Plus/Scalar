@@ -76,7 +76,7 @@ function doLoop( tick ){
         countdownAbandon( delta );
         showStats();
         if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
-        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ v.giftDue = true; } else{ v.spins = 0; } }
+        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ v.giftDue = true; switches.displayRewards = true; } else{ v.spins = 0; } }
         if( tick % 50 == 0 ){ saveState(); }
         if( tick % 1200 == 0 ){ offlineSnapshot(); }
         v.ms.last = tick;
@@ -460,7 +460,10 @@ function updateTabs(){
 function selectJerk( j ){
     clearJerkSelect();
     v.jerkSelected = j;
-    document.querySelector(`[data-jerk="${v.jerkSelected}"]`).classList.add(`selectedJerk`);
+    document.documentElement.classList.add(`jerkCursor`);
+    // document.documentElement.style.cursor = `url('./jerkTiny.png'),auto`;
+    // document.querySelector(`[data-jerk="${v.jerkSelected}"]`).classList.add(`selectedJerk`);
+    document.querySelector(`[data-jerk="${v.jerkSelected}"]`).classList.add(`invis`);
     let slots = document.querySelectorAll(`.slot`);
     for( let i = 0; i < slots.length; i++ ){ slots[i].classList.add(`selectedSlot`); }
     document.querySelector(`.recreate`).classList.add(`selectedSlot`);
@@ -468,11 +471,13 @@ function selectJerk( j ){
 
 function clearJerkSelect(){
     let js = document.querySelectorAll(`[data-jerk]`);
-    for( let i = 0; i < js.length; i++ ){ js[i].classList.remove(`selectedJerk`); }
+    for( let i = 0; i < js.length; i++ ){ js[i].classList.remove(`selectedJerk`); js[i].classList.remove(`invis`); }
+    document.documentElement.classList.remove(`jerkCursor`);
     v.jerkSelected = null;
     let slots = document.querySelectorAll(`.slot`);
     for( let i = 0; i < slots.length; i++ ){ slots[i].classList.remove(`selectedSlot`); }
     if( document.querySelector(`.recreate`) !== null ){ document.querySelector(`.recreate`).classList.remove(`selectedSlot`); }
+    document.documentElement.style.cursor = '';
 }
 
 function assignJerk( j, s ){
@@ -1074,6 +1079,7 @@ function rebirth( s ){
     delete v.upgrades[s];
     buildUpgrades();
     v.upgrades[s].rebirthSpan = parseInt( n ) + 1;
+    if( v.fastest[s] !== undefined ){ v.fastest[s] = 0; }
     display( v.selected );
     selectTab( v.tab, v.miniTab );
     saveState();
@@ -1586,8 +1592,6 @@ function addTestData(){
 /*
 
 TODO
-Make the cursor into a force when assigning mode is live
-
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
