@@ -79,7 +79,7 @@ function doLoop( tick ){
         countdownAbandon( delta );
         showStats();
         if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
-        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ v.giftDue = true; switches.displayRewards = true; } else{ v.spins = 0; } }
+        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ if( Math.random() > 0.5 ){ v.giftDue = true; } else{ v.slotsDue = true; }; switches.displayRewards = true; } else{ v.spins = 0; } }
         if( tick % 50 == 0 ){ saveState(); }
         if( tick % 1200 == 0 ){ offlineSnapshot(); }
         v.ms.last = tick;
