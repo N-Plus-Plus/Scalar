@@ -317,7 +317,7 @@ function calcReward( index ){
     let o = Math.floor( Math.log10( balance( index ) ) );
     if( isNaN( o ) ){ o = 5; }
     for( i in v.bonus ){
-        if( v.slotSpins == 0 ){
+        if( v.slotSpins <= 0 ){
             if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 5; } }
             if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 25; } }
         }
@@ -336,7 +336,7 @@ function complete( ind, auto ){
     else{ v.completed[d]++; }
     let amt = 1;
     for( i in v.bonus ){
-        if( v.slotSpins == 0 ){
+        if( v.slotSpins <= 0 ){
             if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 5; } }
             if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 25; } }
         }
@@ -1186,9 +1186,9 @@ function slotResult( a0, a1, a2 ){
         else{ subj = a2 }
         v.bonus.push( { type: `5x`, subtype: subj, disp: `5x <div class="inlineIcon s${subj} ${subj}"></div> earnings for 2 minutes!`, remaining: global.bonusTime * 8 } );
     }
-    if( v.slotSpins <= 0 ){ v.slotSpins = 0; document.querySelector(`#modal`).classList.add( `noDisplay` ); }
     v.slotSpins--;
     updateSlotSpins();
+    if( v.slotSpins <= 0 ){ v.slotSpins = 0; document.querySelector(`#modal`).classList.add( `noDisplay` ); }
     switches.displayRewards = true;
     switches.displayRuns = true;
     switches.tabUpdate = true;
@@ -1719,12 +1719,19 @@ function addTestData(){
 
 TODO
 Compress and simplify the net effect of Cosmic Forces...
+Lap stats
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
 
 Spinner buffs:
 - - Term based discount to all upgrades?
+
+Special Jerk Traits
+- Pause on complete
+- Cost scale on all tiers
+- Benefit from all unassigned
+- 
 
 */
 
