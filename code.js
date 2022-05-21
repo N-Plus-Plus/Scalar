@@ -1169,10 +1169,10 @@ function populateSlots( fresh ){
 function slotResult( a0, a1, a2 ){
     let subj = ``;
     if( a0 == `nope` && a1 == `nope` && a2 == `nope` ){ // nope'd in
-        v.bonus.push( { type: ``, disp: `So unlucky you get 10 free spins!`, remaining: -1 } ); v.spins += 10;
+        v.bonus.push( { type: ``, disp: `So unlucky you get 10 free spins!`, remaining: -1 } ); v.slotSpins += 10;
     }
     else if( a0 == `nope` && a1 == `nope` || a0 == `nope` && a1 == `nope` || a1 == `nope` && a2 == `nope` ){ // nope'd ish
-        v.bonus.push( { type: ``, disp: `Really unlucky! (have a free spin)`, remaining: -1 } ); v.spins += 1;
+        v.bonus.push( { type: ``, disp: `Really unlucky! (have a free spin)`, remaining: -1 } ); v.slotSpins += 1;
     }
     else if( a0 == `nope` || a1 == `nope` || a2 == `nope` ){ // nope'd out
         v.bonus.push( { type: ``, disp: `Unlucky!`, remaining: -1 } );
