@@ -1127,7 +1127,7 @@ function primeSlots(){
         slots.a0.splice(3,99); slots.a1.splice(3,99); slots.a2.splice(3,99);
         let s = document.querySelectorAll(`.slt`);
         for( let i = 0; i < s.length; i++ ){ s[i].children[0].style = `transform: translateY(${ -3.5 }rem);`; }
-        slotResult( slots.a0[1], slots.a1[1],slots.a2[1] );
+        slotResult( slots.a0[1], slots.a1[1], slots.a2[1] );
         populateSlots( false );
     }
     for( k in slots ){
@@ -1171,7 +1171,10 @@ function slotResult( a0, a1, a2 ){
     if( a0 == `nope` && a1 == `nope` && a2 == `nppe` ){ // nope'd in
         v.bonus.push( { type: ``, disp: `So unlucky you get 10 free spins!`, remaining: -1 } ); v.spins += 10;
     }
-    else if( a0 == `nope` || a1 == `nope` || a2 == `nppe` ){ // nope'd out
+    else if( a0 == `nope` && a1 == `nope` || a0 == `nope` && a1 == `nope` || a1 == `nope` && a2 == `nope` ){ // nope'd ish
+        v.bonus.push( { type: ``, disp: `Really unlucky! (have a free spin)`, remaining: -1 } ); v.spins += 1;
+    }
+    else if( a0 == `nope` || a1 == `nope` || a2 == `nope` ){ // nope'd out
         v.bonus.push( { type: ``, disp: `Unlucky!`, remaining: -1 } );
     }
     else if( a0 !== a1 && a0 !== a2 && a1 !== a2 ){ // no match
@@ -1723,6 +1726,7 @@ Lap stats
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
+- - Right click to buy 10
 
 Spinner buffs:
 - - Term based discount to all upgrades?
