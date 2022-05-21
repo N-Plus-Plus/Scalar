@@ -1168,7 +1168,7 @@ function populateSlots( fresh ){
 
 function slotResult( a0, a1, a2 ){
     let subj = ``;
-    if( a0 == `nope` && a1 == `nope` && a2 == `nppe` ){ // nope'd in
+    if( a0 == `nope` && a1 == `nope` && a2 == `nope` ){ // nope'd in
         v.bonus.push( { type: ``, disp: `So unlucky you get 10 free spins!`, remaining: -1 } ); v.spins += 10;
     }
     else if( a0 == `nope` && a1 == `nope` || a0 == `nope` && a1 == `nope` || a1 == `nope` && a2 == `nope` ){ // nope'd ish
