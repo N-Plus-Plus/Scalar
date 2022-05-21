@@ -199,10 +199,13 @@ function progress(){
     }
     switches.bonusDisplay = false;
     for( b in v.bonus ){
-        v.bonus[b].remaining--;
-        if( v.bonus[b].remaining == 0 ){ v.bonus.splice(b,1); }
-        else if( v.bonus[b].remaining <= -200 ){ v.bonus.splice(b,1); }
-        switches.bonusDisplay = true;
+        if( ( v.bonus[b].type == `5x` || v.bonus[b].type == `25x` ) && v.slotSpins > 0 ){}
+        else{
+            v.bonus[b].remaining--;
+            if( v.bonus[b].remaining == 0 ){ v.bonus.splice(b,1); }
+            else if( v.bonus[b].remaining <= -200 ){ v.bonus.splice(b,1); }
+            switches.bonusDisplay = true;
+        }
     }
     offsetRings();
     displayProgress();
