@@ -15,7 +15,10 @@
     <header id="header"></header>
     <div class="undex noDisplay" id="undex"></div>
     <main id="play">
-        <div id="modal" class="modal noDisplay"><div class="pointer"></div><div class="spinner" style="transform: rotate(0deg);"></div></div>
+        <div id="modal" class="modal noDisplay">
+            <span id="wheel" class="minigame"><div class="pointer"></div><div class="spinner" style="transform: rotate(0deg);"></div></span>
+            <span id="slots" class="minigame"><div class="pokey"><div class="slt" id="a0"><div class="cellBox"></div></div><div class="slt" id="a1"><div class="cellBox"></div></div><div class="slt" id="a2"><div class="cellBox"></div></div></div><div class="spin">Spin</div><div class="slotLabel">Spins remaining: <div class="slotCount" data-slots="0"></div></div></span>
+        </div>
         <section id="runs" class="noDisplay"></section>
         <section id="selected" class="main"></section>
         <section id="upgrades" class="noDisplay"></section>

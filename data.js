@@ -19,7 +19,9 @@ var v = {
     , recreates: 0
     , nextOneFree: false
     , giftDue: false
+    , slotsDue: false
     , spins: 0
+    , slotSpins: 0
     , snaps: []
     , bonus: []
 }
@@ -161,3 +163,5 @@ var jerkSpecialTraits = [
     , { id: `superOutput`, locked: true, scope: `span`, verbiage: `All Tiers 200% output` }
     , { id: `superDiscount`, locked: true, scope: `span`, verbiage: `All Tiers 95% discount` }
 ]
+
+const slots = { a0: [], a1: [], a2: [] }

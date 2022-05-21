@@ -16,6 +16,7 @@ function onLoad(){
     displayWings();
     addScroll();
     topUpZeros();
+    primeSlots();
     if( v.selected == null ){ display( 0 ); }
     else{ display( v.selected ); }
 }
@@ -41,7 +42,9 @@ function clicked(e){
     if( c.contains(`prestige`) ){ safetyOff(); }
     if( c.contains(`refreshMe`) ){ location.reload(); }
     if( c.contains(`gift`) ){ claimGift(); }
+    if( c.contains(`slots`) ){ claimSlots(); }
     if( c.contains(`spinner`) ){ spinToWin(); }
+    if( c.contains(`spin`) ){ spinSlots(); }
     else if( c.contains(`recreate`) && v.jerkSelected !== null ){ recreateJerk( v.jerkSelected ); }
     else if( c.contains(`tooltip`) ){
         t = t.parentElement;
@@ -310,6 +313,10 @@ function getSingleCPS( index, i ){
 function calcReward( index ){
     let o = Math.floor( Math.log10( balance( index ) ) );
     if( isNaN( o ) ){ o = 5; }
+    for( i in v.bonus ){
+        if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 5; } }
+        if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 25; } }
+    }
     return o;
 }
 
@@ -322,7 +329,12 @@ function complete( ind, auto ){
     v.reward[span[d].curr].gained += calcReward( ind );
     if( v.completed[d] == undefined ){ v.completed[d] = 1; updateTabs(); }
     else{ v.completed[d]++; }
-    v.curr.gained++;
+    let amt = 1;
+    for( i in v.bonus ){
+        if( v.bonus.type == `5x` ){ if( v.bonus.subtype == `points` ){ amt *= 5; } }
+        if( v.bonus.type == `25x` ){ if( v.bonus.subtype == `points` ){ amt *= 25; } }
+    }
+    v.curr.gained += amt;
     v.runs.splice(ind,1)
     let nextSelection = Math.max( 0, v.runs.findIndex( e => e.span == d ) );    
     if( !auto ){ v.selected = nextSelection; switches.display = true; }
@@ -437,6 +449,7 @@ function displayRewards(){
         else{ t.innerHTML += `<div class="rewardBox"><div class="s${key} curr"></div> ${numDisplay( netReward( type ) )}</div>`}
     }
     if( v.giftDue ){ t.innerHTML += `<div class="rewardBox"><div class="gift"></div><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
+    else if( v.slotsDue ){ t.innerHTML += `<div class="rewardBox"><div class="slots"></div><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
     else{ t.innerHTML += `<div class="rewardBox"><div class="points curr"></div> ${numDisplay( v.curr.gained - v.curr.spent )}</div>`; }
     let u = document.querySelectorAll(`[data-curr]`);
     for( let i = 0; i < u.length; i++ ){ u[i].innerHTML = numDisplay( netReward( span[v.tab].curr ) ) };
@@ -1040,7 +1053,20 @@ function claimGift(){
     v.spins++;
     v.giftDue = false;
     switches.displayRewards = true;
-    displaySpinner();
+    displaySpinner( `wheel` );
+}
+
+function claimSlots(){
+    v.slotSpins += 10;
+    v.slotsDue = false;
+    switches.displayRewards = true;
+    updateSlotSpins();
+    displaySpinner( `slots` );
+}
+
+function updateSlotSpins(){
+    let t = document.querySelector(`[data-slots]`);
+    t.innerHTML = numDisplay( v.slotSpins );
 }
 
 function spinToWin(){
@@ -1048,7 +1074,7 @@ function spinToWin(){
     let t = document.querySelector(`.spinner`);
     let arr = [
         { deg: 18, does: `output`, id: 0 }
-        , { deg: 54, does: `freeUpgrade`, id: 1 }        
+        , { deg: 54, does: `freeUpgrade`, id: 1 }
         , { deg: 90, does: `points`, id: 2 }
         , { deg: 126, does: `60mins`, id: 3 }
         , { deg: 162, does: `clickMe`, id: 4 }
@@ -1067,11 +1093,100 @@ function spinToWin(){
     let oldChoice = arr.findIndex( e => e.deg == sel );
     let outcome = arr[choice].does;
     if( oldChoice !== -1 ){ outcome = arr[oldChoice].does };
+    t.classList.add(`dontTouch`);
     setTimeout(() => { reward( outcome ); }, global.spinTimer );
 }
 
-function displaySpinner(){
+function spinSlots(){
+    document.querySelector(`.spin`).classList.add(`spinning`);
+    setTimeout(() => { primeSlots() }, 5500 );
+    let s = document.querySelectorAll(`.slt`);
+    let delay = -250;
+    for( let i = 0; i < s.length; i++ ){ delay += 250; setTimeout(() => { s[i].children[0].style = `transition: all 5s; transform: translateY(${ -3.5 - ( 9 * 30 ) }rem);`; }, delay ); }
+}
+
+function displaySpinner( type ){
     document.querySelector(`#modal`).classList.remove(`noDisplay`);
+    let e = document.querySelectorAll(`.minigame`);
+    for( let i = 0; i < e.length; i++ ){ e[i].classList.add(`noDisplay`) }
+    document.querySelector(`#${type}`).classList.remove(`noDisplay`);
+}
+
+function primeSlots(){
+    document.querySelector(`.spin`).classList.remove(`spinning`);
+    if( slots.a0.length == 0 ){ populateSlots( true ); return; }
+    else{
+        slots.a0.splice(0,30); slots.a1.splice(0,30); slots.a2.splice(0,30);
+        slots.a0.splice(3,99); slots.a1.splice(3,99); slots.a2.splice(3,99);
+        let s = document.querySelectorAll(`.slt`);
+        for( let i = 0; i < s.length; i++ ){ s[i].children[0].style = `transform: translateY(${ -3.5 }rem);`; }
+        slotResult( slots.a0[1], slots.a1[1],slots.a2[1] );
+        v.slotSpins--;
+        updateSlotSpins();
+        populateSlots( false );
+    }
+    for( k in slots ){
+        let t = document.querySelector( `#${k}` ).children[0];
+        t.innerHTML = ``;
+        for( x in slots[k] ){ t.appendChild( elem( `slotCell ${slots[k][x]}` ) ); }
+    }    
+}
+
+function populateSlots( fresh ){
+    let slt = {};
+    let arr = [`points`,`nope`];
+    for( i in v.reward ){ arr.push( `s` + String( span.findIndex(e=>e.curr == i) ) ); }
+    if( fresh ){
+        slt.a0 = [`nope`,`s0`,`points`];
+        slt.a1 = [`nope`,`s0`,`points`];
+        slt.a2 = [`nope`,`s0`,`points`];
+    }
+    else{
+        slt.a0 = JSON.parse( JSON.stringify( slots.a0 ) );
+        slt.a1 = JSON.parse( JSON.stringify( slots.a1 ) );
+        slt.a2 = JSON.parse( JSON.stringify( slots.a2 ) );
+    }
+    let s = shuffle( arr );
+    for( k in slt ){
+        let adj = parseInt( Math.floor( Math.random() * s.length ) );
+        for( let i = 0; i < adj; i++ ){ slt[k].push( s[i] ) }
+        while( slt[k].length < 41 ){ for( j in s ){ slt[k].push( s[j] ) } }
+    }
+    slots.a0 = slt.a0;
+    slots.a1 = slt.a1;
+    slots.a2 = slt.a2;
+    for( k in slots ){
+        let t = document.querySelector( `#${k}` ).children[0];
+        for( x in slots[k] ){ t.appendChild( elem( `slotCell ${slots[k][x]}` ) ); }
+    }
+}
+
+function slotResult( a0, a1, a2 ){
+    let subj = ``;
+    if( a0 == `nope` && a1 == `nope` && a2 == `nppe` ){ // nope'd in
+        v.bonus.push( { type: ``, disp: `So unlucky you get 10 free spins!`, remaining: -1 } ); v.spins += 10;
+    }
+    else if( a0 == `nope` || a1 == `nope` || a2 == `nppe` ){ // nope'd out
+        v.bonus.push( { type: ``, disp: `Unlucky!`, remaining: -1 } );
+    }
+    else if( a0 !== a1 && a0 !== a2 && a1 !== a2 ){ // no match
+        v.bonus.push( { type: ``, disp: `No match!`, remaining: -1 } );
+    }
+    else if( a0 == a1 && a1 == a2 ){ // total match
+        subj = a0;
+        v.bonus.push( { type: `25x`, subtype: subj, disp: `25x <div class="inlineIcon s${subj} ${subj}"></div> earnings for 5 minutes!`, remaining: global.bonusTime * 20 } );        
+    }
+    else{ // partial match
+        if( a0 == a1 ){ subj = a0 }
+        else{ subj = a2 }
+        v.bonus.push( { type: `5x`, subtype: subj, disp: `5x <div class="inlineIcon s${subj} ${subj}"></div> earnings for 2 minutes!`, remaining: global.bonusTime * 8 } );
+    }
+    if( v.slotSpins <= 0 ){ v.slotSpins = 0; document.querySelector(`#modal`).classList.add( `noDisplay` ); }
+    switches.displayRewards = true;
+    switches.displayRuns = true;
+    switches.tabUpdate = true;
+    switches.updateDisplay = true;
+    switches.updateTabButtons = true;
 }
 
 function rebirth( s ){
@@ -1150,8 +1265,8 @@ function loadState(){
     setIco( v.watermark );
     let elapsed = now() - v.ms.last;
     if( elapsed > global.offlineGrace ){ offlineProgress( elapsed ); }
-    if( elapsed > 1 / global.giftChance ){ v.giftDue = true; }
-    else if( Math.random() < global.giftChance * ( elapsed / global.tickSpeed ) ){ v.giftDue = true; }
+    if( elapsed > 1 / global.giftChance ){ if( Math.random() > 0.5 ){ v.giftDue = true; } else{ v.slotsDue = true; } } //slotChance
+    else if( Math.random() < global.giftChance * ( elapsed / global.tickSpeed ) ){ if( Math.random() > 0.5 ){ v.giftDue = true; } else{ v.slotsDue = true; } }
 }
 
 function exportState(){
@@ -1182,7 +1297,8 @@ function dataFix(){
     if( v.nextOneFree == undefined ){ v.nextOneFree = false; }
     if( v.spins == undefined ){ v.spins = 0; }
     if( v.removeDoubleCount !== undefined ){ delete v.removeDoubleCount; }
-    if( v.giftDue == undefined ){ v.giftDue = true; }
+    if( v.giftDue == undefined ){ v.giftDue = false; }
+    if( v.slotsDue == undefined ){ v.slotsDue = false; }
     if( v.snaps == undefined ){ v.snaps = []; }
     if( v.reward.Uncertainty != undefined ){
         if( v.reward.Uncertainty.gained == undefined ){
@@ -1194,6 +1310,7 @@ function dataFix(){
     upgrades.filter( e => e.id == `abandonQuest`)[0].multi = 2;
     for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) || v.runs[r].curr.cps == null ){ recreateRun(r) } };
     for( r in v.runs ){ if( v.runs[r].curr.gained == 0 ){ v.runs[r].curr.gained = 10 } if( v.runs[r].curr.cps == null ){ updateCPS(r) } };
+    if( v.slotSpins == undefined ){ v.slotSpins = 0; }
 }
 
 function safetyOff(){
@@ -1364,6 +1481,7 @@ function doItAllOverAgain(){
     v.bonus = [];
     v.nextOneFree = false;
     v.giftDue = false;
+    v.slotsDue = false;
     v.spins = 0;
     v.snaps = [];
     extrapolateMeta();
@@ -1415,6 +1533,7 @@ function reward( x ){
         break;
     }
     if( v.spins <= 0 ){ document.querySelector(`#modal`).classList.add( `noDisplay` ); }
+    document.querySelector(`.spinner`).classList.remove(`dontTouch`);
     switches.displayRewards = true;
     switches.displayRuns = true;
     switches.tabUpdate = true;
@@ -1592,6 +1711,7 @@ function addTestData(){
 /*
 
 TODO
+Prevent clicking a spinning wheel from initialising a new spin!!!!
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
