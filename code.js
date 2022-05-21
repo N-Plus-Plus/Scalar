@@ -317,8 +317,10 @@ function calcReward( index ){
     let o = Math.floor( Math.log10( balance( index ) ) );
     if( isNaN( o ) ){ o = 5; }
     for( i in v.bonus ){
-        if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 5; } }
-        if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 25; } }
+        if( v.slotSpins == 0 ){
+            if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 5; } }
+            if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype.replace(`s`,``) == v.runs[index].span ){ o *= 25; } }
+        }
     }
     return o;
 }
@@ -334,8 +336,10 @@ function complete( ind, auto ){
     else{ v.completed[d]++; }
     let amt = 1;
     for( i in v.bonus ){
-        if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 5; } }
-        if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 25; } }
+        if( v.slotSpins == 0 ){
+            if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 5; } }
+            if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 25; } }
+        }
     }
     v.curr.gained += amt;
     v.runs.splice(ind,1)
@@ -1124,8 +1128,6 @@ function primeSlots(){
         let s = document.querySelectorAll(`.slt`);
         for( let i = 0; i < s.length; i++ ){ s[i].children[0].style = `transform: translateY(${ -3.5 }rem);`; }
         slotResult( slots.a0[1], slots.a1[1],slots.a2[1] );
-        v.slotSpins--;
-        updateSlotSpins();
         populateSlots( false );
     }
     for( k in slots ){
@@ -1185,6 +1187,8 @@ function slotResult( a0, a1, a2 ){
         v.bonus.push( { type: `5x`, subtype: subj, disp: `5x <div class="inlineIcon s${subj} ${subj}"></div> earnings for 2 minutes!`, remaining: global.bonusTime * 8 } );
     }
     if( v.slotSpins <= 0 ){ v.slotSpins = 0; document.querySelector(`#modal`).classList.add( `noDisplay` ); }
+    v.slotSpins--;
+    updateSlotSpins();
     switches.displayRewards = true;
     switches.displayRuns = true;
     switches.tabUpdate = true;
@@ -1714,7 +1718,7 @@ function addTestData(){
 /*
 
 TODO
-Prevent clicking a spinning wheel from initialising a new spin!!!!
+Compress and simplify the net effect of Cosmic Forces...
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
