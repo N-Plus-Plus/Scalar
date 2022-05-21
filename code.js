@@ -334,8 +334,8 @@ function complete( ind, auto ){
     else{ v.completed[d]++; }
     let amt = 1;
     for( i in v.bonus ){
-        if( v.bonus.type == `5x` ){ if( v.bonus.subtype == `points` ){ amt *= 5; } }
-        if( v.bonus.type == `25x` ){ if( v.bonus.subtype == `points` ){ amt *= 25; } }
+        if( v.bonus[i].type == `5x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 5; } }
+        if( v.bonus[i].type == `25x` ){ if( v.bonus[i].subtype == `points` ){ amt *= 25; } }
     }
     v.curr.gained += amt;
     v.runs.splice(ind,1)
