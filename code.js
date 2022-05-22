@@ -1321,6 +1321,7 @@ function dataFix(){
     for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) || v.runs[r].curr.cps == null ){ recreateRun(r) } };
     for( r in v.runs ){ if( v.runs[r].curr.gained == 0 ){ v.runs[r].curr.gained = 10 } if( v.runs[r].curr.cps == null ){ updateCPS(r) } };
     if( v.slotSpins == undefined ){ v.slotSpins = 0; }
+    global.tierLimit = 3 + meta.limits.filter( e => e.id == `tierLimit` )[0].bought;
 }
 
 function safetyOff(){
