@@ -874,12 +874,14 @@ function scrollScroll(){
     if( v.bonus.length == 0 ){ switches.bonusDisplay = false; }
     if( document.querySelector(`#footer`).children.length == 0 ){ addScroll(); }
     let s = document.querySelector(`.scroll`);
-    let newT = parseFloat( s.getAttribute(`data-transform`) ) - global.scrollSpeed;
-    s.setAttribute( `data-transform`, newT );
-    s.style = `transform: translate( ${newT}px, 0px )`;
-    if( newT <= document.querySelector(`.scroll`).clientWidth * -1 - 100 ){
-        document.querySelector(`#footer`).innerHTML = ``;
-        addScroll();
+    if( s !== null ){
+        let newT = parseFloat( s.getAttribute(`data-transform`) ) - global.scrollSpeed;
+        s.setAttribute( `data-transform`, newT );
+        s.style = `transform: translate( ${newT}px, 0px )`;
+        if( newT <= document.querySelector(`.scroll`).clientWidth * -1 - 100 ){
+            document.querySelector(`#footer`).innerHTML = ``;
+            addScroll();
+        }
     }
 }
 
@@ -1724,6 +1726,7 @@ function addTestData(){
 TODO
 Compress and simplify the net effect of Cosmic Forces...
 Lap stats
+Don't allow the last of any lap upgrade be disabled without enabling another
 
 Totally New Features (make work and show costing)
 - - Clickable Timeout (animation duration)
