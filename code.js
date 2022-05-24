@@ -79,7 +79,7 @@ function doLoop( tick ){
         countdownAbandon( delta );
         showStats();
         if( Math.random() < global.spawnChance * Math.pow( getBenefit( `clickSpawn` ), v.upgrades.clickSpawn ) ){ spawnClickMe(); }
-        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ if( Math.random() > 0.5 || v.completed[`0`] < 100 ){ v.giftDue = true; } else{ v.slotsDue = true; }; switches.displayRewards = true; } else{ v.spins = 0; } }
+        if( Math.random() < global.giftChance * Math.log10(v.runs.length) ){ if( v.spins >= 0 ){ if( Math.random() > 0.5 || vCompelted() < 25 ){ v.giftDue = true; } else{ v.slotsDue = true; }; switches.displayRewards = true; } else{ v.spins = 0; } }
         if( tick % 50 == 0 ){ saveState(); }
         if( tick % 1200 == 0 ){ offlineSnapshot(); }
         v.ms.last = tick;
@@ -403,6 +403,12 @@ function spawnCheck(){
             }
         }
     }
+}
+
+function vCompelted(){
+    let o = 0;
+    for( i in v.completed ){ o += v.completed[i]; }
+    return o;
 }
 
 function topUpZeros(){
@@ -1277,8 +1283,8 @@ function loadState(){
     setIco( v.watermark );
     let elapsed = now() - v.ms.last;
     if( elapsed > global.offlineGrace ){ offlineProgress( elapsed ); }
-    if( elapsed > 1 / global.giftChance ){ if( Math.random() > 0.5 || v.completed[`0`] < 100 ){ v.giftDue = true; } else{ v.slotsDue = true; } } //slotChance
-    else if( Math.random() < global.giftChance * ( elapsed / global.tickSpeed ) ){ if( Math.random() > 0.5 || v.completed[`0`] < 100 ){ v.giftDue = true; } else{ v.slotsDue = true; } }
+    if( elapsed > 1 / global.giftChance ){ if( Math.random() > 0.5 || vCompelted() < 25 ){ v.giftDue = true; } else{ v.slotsDue = true; } } //slotChance
+    else if( Math.random() < global.giftChance * ( elapsed / global.tickSpeed ) ){ if( Math.random() > 0.5 || vCompelted() < 25 ){ v.giftDue = true; } else{ v.slotsDue = true; } }
 }
 
 function exportState(){
