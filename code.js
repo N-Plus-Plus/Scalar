@@ -395,7 +395,7 @@ function spawnCheck(){
     for( r in v.completed ){
         let nxt = nextDef( r );
         let target = getTarget( nxt );
-        if( v.completed[r] >= target ){
+        if( v.completed[r] >= target && nxt !== undefined ){
             if( v.runs.filter( e => e.span == nxt ).length < global.tierLimit ){
                 v.completed[r] -= target;
                 v.runs.push( new Run( nxt ) );
