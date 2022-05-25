@@ -35,7 +35,8 @@ class Run{
         this.autoOverride = [];
         for( let i = 0; i < global.ranks; i++ ){
             let x = 0;
-            if( v.upgrades[d].headStart !== undefined ){ x = v.upgrades[d].headStart[i]; }
+            if( v.upgrades[d] == undefined ){}
+            else if( v.upgrades[d].headStart !== undefined ){ x = v.upgrades[d].headStart[i]; }
             this.gen.push( x );
             if( v.upgrades[d].autoBuy[i] == 0 ){ this.auto[`t${i}`] = null; }
             else{ this.auto[`t${i}`] = autoBuyTime( d, i ); }
