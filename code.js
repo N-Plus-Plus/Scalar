@@ -2,6 +2,7 @@ document.addEventListener(`DOMContentLoaded`, function () { onLoad(); } );
 window.addEventListener("mousedown", function (e) { clicked( e ); v.mouseDown = true; } );
 window.addEventListener("mouseup", function (e) { resetHold(); } );
 window.addEventListener("keydown", function(e) { pressed( e ) } );
+window.addEventListener('resize', function(e) { fixScale(); } );
 
 function onLoad(){
     loadMeta();
@@ -17,6 +18,7 @@ function onLoad(){
     addScroll();
     topUpZeros();
     primeSlots();
+    fixScale();
     if( v.selected == null ){ display( 0 ); }
     else{ display( v.selected ); }
 }
@@ -1784,3 +1786,11 @@ const referrals = [
     , { name: ``, url: ``, visited: 0 }
 ]
 
+function fixScale(){
+    let w = window.innerWidth;
+    if( w < 1321 ){
+        let rem = Math.floor( window.innerWidth / 100 );
+        document.getElementsByTagName(`html`)[0].style.fontSize = rem + `px`;
+    }
+    else{ document.getElementsByTagName(`html`)[0].style.fontSize = `16px` }
+}
