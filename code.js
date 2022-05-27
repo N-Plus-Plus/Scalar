@@ -239,6 +239,7 @@ function buy( ii, g, auto ){
         if( auto && ii !== v.selected ){}
         else{ switches.updateDisplay = true; }
     }
+    highlightBestROI();
 }
 
 function afford( index, g ){
@@ -443,6 +444,20 @@ function display( index ){
     updateCompleting();
     offsetRings();
     switches.display = false;
+    highlightBestROI();
+}
+
+function highlightBestROI(){
+    let rows = document.querySelectorAll(`.tableRow`);
+    for( let i = 0; i < rows.length; i++ ){ rows[i].classList.remove(`highlightRow`); }
+    let s = 0;
+    let best = 0;
+    for( let i = 0; i < 9; i++ ){
+        let c = cost( v.selected, i );
+        let b = getSingleCPS( v.selected, i );
+        if( b / c > best ){ best = b / c; s = i; }
+    }
+    rows[s].classList.add(`highlightRow`);
 }
 
 function updateDisplay(){
@@ -1701,6 +1716,7 @@ const helpful = [
     , `Assign a Cosmic Force to gain its benefit`
     , `Rebirth will trade all your upgrades for a big boost, but you'll keep your wealth`
     , `Your progress will save automatically every few seconds`
+    , `The highlighteed Tier row shows the generator with the best return on investment`
 
     , `59 6F 75 20 77 65 6E 74 20 74 6F 20 61 20 6C 6F 74 20 6F 66 20 74 72 6F 75 62 6C 65 20 74 6F 20 72 65 61 64 20 74 68 69 73 2E 2E 2E`
     , `I'm not convinced that the person who made this game understands what the word "scalar" means...`
