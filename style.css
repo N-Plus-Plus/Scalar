@@ -49,7 +49,7 @@ section{ max-height: calc( 100% - 7rem ); padding-bottom: 0; padding-top: 0.75re
 #runs{ max-height: calc( 100% - 7rem ); overflow-y: auto; overflow-x: hidden; padding-bottom: 0; padding-top: 0.75rem;}
 
 .stat{ font-family: var(--numeric); font-weight: 800;}
-.tableHeadings,.tableRow{ display: flex; height: 2rem; margin: 0 0 1rem 0; }
+.tableHeadings,.tableRow{ display: flex; height: 2.05rem; margin: 0 0 1rem 0; }
 .heading,.cell{ width: 6rem; display: flex; align-items: center; justify-content: center;}
 .bigCell{ width: 12rem; height: 2.25rem; display: flex; align-items: center; justify-content: flex-start; padding-left: 1rem;}
 .halfCell{ width: 4rem; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;}
@@ -190,4 +190,4 @@ input:checked + .slider:before { transform: translateX(1.5rem); }
 .slotLabel{ font-size: 1.65rem; position: absolute; width: 30rem; left: calc( 50% - 15rem); top: calc( 50% - 13.5rem ); display: flex; align-items: flex-end; justify-content: center; }
 .slotCount{ margin-left: 0.5rem; font-family: var(--numeric); font-weight: 800; font-size: 1.75rem; }
 
-.highlightRow{ background-color: #fff1;}
+.highlightRow{ background-color: var(--spanLite); }

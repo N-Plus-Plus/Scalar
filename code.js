@@ -441,6 +441,7 @@ function display( index ){
     displayProgress();
     showStats();
     document.documentElement.style.setProperty('--span', span[v.runs[index].span].color );
+    document.documentElement.style.setProperty('--spanLite', span[v.runs[index].span].color + `66` );
     updateCompleting();
     offsetRings();
     switches.display = false;
