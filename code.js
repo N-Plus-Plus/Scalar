@@ -453,7 +453,7 @@ function highlightBestROI(){
     for( let i = 0; i < rows.length; i++ ){ rows[i].classList.remove(`highlightRow`); }
     let s = 0;
     let best = 0;
-    for( let i = 0; i < 9; i++ ){
+    for( let i = 0; i <= 9; i++ ){
         let c = cost( v.selected, i );
         let b = getSingleCPS( v.selected, i );
         if( b / c > best ){ best = b / c; s = i; }
@@ -1799,7 +1799,7 @@ const referrals = [
     , { name: `Antimatter Dimensions`, url: `https://ivark.github.io/`, visited: 0 }
     , { name: `Chime Clicker`, url: `http://chimeclicker.lol.s3-website-us-east-1.amazonaws.com/`, visited: 0 }
     , { name: `Space Plan`, url: `http://spaceplan.click/`, visited: 0 }
-    , { name: ``, url: ``, visited: 0 }
+    , { name: `Matter of Scale`, url: `https://astarsearcher.bitbucket.io/`, visited: 0 }
     , { name: ``, url: ``, visited: 0 }
 ]
 
