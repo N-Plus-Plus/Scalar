@@ -1249,7 +1249,7 @@ function kickStart( d ){
 }
 
 function adjustQuestTargets(){
-    for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target / getBenefit( `questTarget` ) ); }
+    for( r in v.runs ){ v.runs[r].quest.target = Math.ceil( v.runs[r].quest.target * getBenefit( `questTarget` ) ); }
     switches.display = true;
 }
 
@@ -1344,6 +1344,7 @@ function dataFix(){
     if( v.offline !== undefined ){ delete v.offline }
     upgrades.filter( e => e.id == `abandonQuest`)[0].cost = 5;
     upgrades.filter( e => e.id == `abandonQuest`)[0].multi = 2;
+    upgrades.filter( e => e.id == `questTarget`)[0].benefit = 0.9;
     for( r in v.runs ){ if( isNaN( v.runs[r].curr.cps ) || v.runs[r].curr.cps == null ){ recreateRun(r) } };
     for( r in v.runs ){ if( v.runs[r].curr.gained == 0 ){ v.runs[r].curr.gained = 10 } if( v.runs[r].curr.cps == null ){ updateCPS(r) } };
     if( v.slotSpins == undefined ){ v.slotSpins = 0; }

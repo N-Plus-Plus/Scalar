@@ -65,7 +65,7 @@ var meta = {
     , spend: 0
     , upgrades: [
           { id: `maxZeros`,         locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 1, benefit: 1, multi: 5, nice: `Quantum Limit`, tooltip: `Increase the max number of Quantum by 1` } }
-        , { id: `questTarget`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 5, benefit: 1.1, multi: 1.75, nice: `Quest Targets`, tooltip: `Reduce the targets of all Quests by 10%` } }
+        , { id: `questTarget`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 5, benefit: 0.9, multi: 1.75, nice: `Quest Targets`, tooltip: `Reduce the targets of all Quests by 10%` } }
         , { id: `clickSpawn`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 3, benefit: 1.1, multi: 2, nice: `Clickables`, tooltip: `Increase the spawn rate of clickables by 5%` } }
         , { id: `skillTypes`,       locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 3, benefit: 1, multi: 2.5, nice: `Force Traits`, tooltip: `Increase the maximum number of Traits that a Force can be created with by 1` } }
         , { id: `recruitJerk`,      locked: false,  bought: 0,  adjust: ``, p: { scope: `global`, cost: 2, benefit: 1, multi: 1.75, nice: `Create Force`, tooltip: `Add one Cosmic Force to your roster` } }
@@ -105,7 +105,7 @@ var meta = {
         , { id: `flatDiscount`,     locked: false, nice: `Tier Discount`, p: { significance: 0.075, scope: `tier`, verbiage: `#% discount on @ cost` } }
     ]
     , limits: [
-          { id: `tierLimit`, bought: 0, default: 3, nice: `Layer Limit`, adjust: `@+(3*#)`, does: `+3`, max: null, verbiage: `Maximum runs allowed per Layer.` }
+          { id: `tierLimit`, bought: 0, default: 3, nice: `Layer Limit`, adjust: `@+#`, does: `+1`, max: null, verbiage: `Maximum runs allowed per Layer.` }
         , { id: `spanTarget`, bought: 0, default: 5, nice: `Completion Req.`, adjust: `@-(#)`, does: `-1`, max: 4, verbiage: `Base amount of runs required to generate one of the Layer above it.` }
         , { id: `autoComplete`, bought: 0, default: 120, nice: `Auto-Complete Time`, adjust: `@*Math.pow(0.8,#)`, max: null, does: `-20%`, verbiage: `Baseline number of seconds that Auto-Complete takes from which to apply scale.` }
         , { id: `recreateCost`, bought: 0, default: 5, nice: `Recreate Cost`, adjust: `@-#`, max: 4, does: `-1`, verbiage: `Baseline cost of Cosmic Forces from which to apply scale.` }

@@ -6,16 +6,16 @@ class Quest{
         let w = Object.keys( span ).findIndex( (e) => e == d );
         if( q.basis == `buy1Gen` ){
             let n = Math.floor( Math.random() * q.target.length );
-            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( getBenefit( `questTarget` ), v.upgrades.questTarget ) );
+            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) * Math.pow( getBenefit( `questTarget` ), v.upgrades.questTarget ) );
             this.tier = q.target[n].t;
         }
         else if( q.basis == `buyNGen` ){
             let n = Math.floor( Math.random() * q.target.length );
-            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) / Math.pow( getBenefit( `questTarget` ), v.upgrades.questTarget ) );
+            this.target = Math.floor( q.target[n].a * Math.pow( global.scale.span, w ) * Math.pow( getBenefit( `questTarget` ), v.upgrades.questTarget ) );
             this.tier = q.target[n].t;
         }
         else{
-            this.target = Math.floor( q.target * Math.pow( global.scale.span, w ) ) / Math.pow( getBenefit( `questTarget` ), v.upgrades.questTarget );
+            this.target = Math.floor( q.target * Math.pow( global.scale.span, w ) ) * Math.pow( getBenefit( `questTarget` ), v.upgrades.questTarget );
         }
         this.target = Math.max( this.target, 1 );
         this.basis = q.basis;
@@ -35,8 +35,7 @@ class Run{
         this.autoOverride = [];
         for( let i = 0; i < global.ranks; i++ ){
             let x = 0;
-            if( v.upgrades[d] == undefined ){}
-            else if( v.upgrades[d].headStart !== undefined ){ x = v.upgrades[d].headStart[i]; }
+            if( v.upgrades[d].headStart !== undefined ){ x = v.upgrades[d].headStart[i]; }
             this.gen.push( x );
             if( v.upgrades[d].autoBuy[i] == 0 ){ this.auto[`t${i}`] = null; }
             else{ this.auto[`t${i}`] = autoBuyTime( d, i ); }
